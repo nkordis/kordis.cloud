@@ -82,7 +82,7 @@ const NavBar = () => {
           <Nav className="me-auto" />
           <Nav>
             {data
-              && data.sections?.map((section, index) => (section?.type === 'link' ? (
+              && data.sections?.filter((section) => section.isActive === true).map((section, index) => (section?.type === 'link' ? (
                 <ExternalNavLink
                   key={section.title}
                   href={section.href}
