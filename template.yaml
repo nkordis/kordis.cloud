@@ -1,0 +1,135 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  kordis.cloud
+
+  Sample SAM Template for kordis.cloud
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+
+Resources:
+  KordisCloudBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: kordis-cloud
+      WebsiteConfiguration:
+        IndexDocument: index.html     
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        IgnorePublicAcls: false
+        BlockPublicPolicy: false
+        RestrictPublicBuckets: false
+
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: kordis-cloud
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  KordisCloudWildcardCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: "*.kordis.cloud"
+      ValidationMethod: DNS
+
+  WebDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        ViewerCertificate:
+          AcmCertificateArn: !Ref KordisCloudWildcardCertificate
+          SslSupportMethod: sni-only
+        Aliases:
+          - main.kordis.cloud
+        DefaultCacheBehavior:
+          TargetOriginId: S3KordisCloudOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          DefaultTTL: 0
+          MaxTTL: 0
+          MinTTL: 0       
+          ForwardedValues:
+            QueryString: false
+        Origins:
+          - DomainName: !GetAtt KordisCloudBucket.RegionalDomainName
+            Id: S3KordisCloudOrigin
+            CustomOriginConfig:
+              OriginProtocolPolicy: match-viewer
+        DefaultRootObject: index.html
+        Enabled: true
+  
+  KordisCloudCloutFrontAliasRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z05030141Q82CAW2GKME0
+      Name: main.kordis.cloud
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt WebDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+  
+  KordisCloudBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref KordisCloudBucket
+      PolicyDocument:
+        Id: PublicReadS3Policy
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Sub "arn:aws:s3:::${KordisCloudBucket}/*"
+
+  VisitorCountGetFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: visitor-get-function/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        Getvisits:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /visits
+            Method: get
+  
+  VisitorCountPutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: visitor-put-function/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Architectures:
+        - x86_64
+      Events:
+        UpdateVisits:
+          Type: Api
+          Properties:
+            Path: /visits
+            Method: put
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  VisitorCountApi:
+    Description: "API Gateway endpoint URL for Prod stage for Visitor Count function"
+    Value: !Sub "https://${VisitorCountGetFunction}.execute-api.${AWS::Region}.amazonaws.com/Prod/visits/"
+  VisitorCountGetFunction:
+    Description: "Visitor Count Lambda Function ARN"
+    Value: !GetAtt VisitorCountGetFunction.Arn
+  VisitorCountFunctionIamRole:
+    Description: "Implicit IAM Role created for Visitor Count function"
+    Value: !GetAtt VisitorCountGetFunctionRole.Arn

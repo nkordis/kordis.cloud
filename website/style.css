@@ -1,0 +1,62 @@
+/* General body styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 100px; /* Add bottom padding to accommodate the footer */
+    background: #f4f4f4;
+    color: #333;
+}
+
+/* Header styling */
+header {
+    background: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+header a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Section styling */
+section {
+    padding: 20px;
+    margin: 0 15px;
+    background: #fff;
+    border-bottom: 2px solid #eee;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+/* List styles */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 8px 0;
+}
+
+/* Footer styling */
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background: #333;
+    color: #fff;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+}
