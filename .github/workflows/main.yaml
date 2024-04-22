@@ -60,12 +60,12 @@ jobs:
     
     - name: Invoke VisitorCountPutFunction
       run: |
-        result=$(aws lambda invoke --function-name VisitorCountPutFunction-93pkDPDzRma9 --payload '{}' output.json)
+        result=$(aws lambda invoke --function-name kordis-cloud-VisitorCountPutFunction-93pkDPDzRma9 --payload '{}' output.json)
         echo "VisitorCountPutFunction response: $result" >> $GITHUB_ENV
 
     - name: Invoke VisitorCountGetFunction
       run: |
-        result=$(aws lambda invoke --function-name VisitorCountGetFunction-S7H4b4ars0zf --payload '{}' output.json)
+        result=$(aws lambda invoke --function-name kordis-cloud-VisitorCountGetFunction-S7H4b4ars0zf --payload '{}' output.json)
         echo "VisitorCountGetFunction response: $result" >> $GITHUB_ENV
 
     - name: Summarize Validation Outcomes
