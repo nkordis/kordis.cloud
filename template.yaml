@@ -104,6 +104,9 @@ Resources:
           Properties:
             Path: /visits
             Method: get
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: kordis-cloud
   
   VisitorCountPutFunction:
     Type: AWS::Serverless::Function

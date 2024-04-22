@@ -21,7 +21,8 @@ deploy-site:
 # Run the VisitorCountGetFunction locally
 run-VisitorCountGetFunction:
 	@echo "Running the VisitorCountGetFunction locally..."
-	sam local invoke VisitorCountGetFunction --event events/event.json
+	sam build
+	sam local invoke VisitorCountGetFunction 
 
 # Run the VisitorCountPutFunction locally
 run-VisitorCountPutFunction:
