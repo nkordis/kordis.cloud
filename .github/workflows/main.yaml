@@ -44,7 +44,7 @@ jobs:
           echo "Website configuration is incorrect."
           echo "s3_website_validation_result=Website configuration is incorrect." >> $GITHUB_ENV
           exit 1
-
+        fi
     - name: Summarize Validation Outcomes
       run: |
         echo "Validation check: $validation_result"
