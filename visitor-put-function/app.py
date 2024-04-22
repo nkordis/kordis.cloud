@@ -1,5 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
+import json
 
 # Initialize a DynamoDB client
 dynamodb = boto3.resource('dynamodb')
@@ -28,7 +29,7 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Methods": "PUT,OPTIONS",  
             "Access-Control-Allow-Headers": "Content-Type"  
             },
-            'body': f"Updated visit count: {response['Attributes']['visitsCount']}"
+            'body': json.dumps({"message": "Updated visit count", "visitsCount": int(response['Attributes']['visitsCount'])})
         }
     except ClientError as e:
         # Handle potential errors
@@ -40,7 +41,7 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Methods": "PUT,OPTIONS",  
             "Access-Control-Allow-Headers": "Content-Type"  
             },
-            'body': 'Failed to update visit count'
+            'body': json.dumps({"message": "AWS service error"})
         }
 
 
