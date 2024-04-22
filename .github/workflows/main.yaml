@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: '3.9'
 
@@ -23,7 +23,7 @@ jobs:
         pip install awscli boto3
     
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+      uses: aws-actions/configure-aws-credentials@v3
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -31,7 +31,9 @@ jobs:
 
     - name: Validate CloudFormation template
       run: |
-        aws cloudformation validate-template --template-body file://template.yaml
+        result=$(aws cloudformation validate-template --template-body file://template.yaml > /dev/null && echo "success" || echo "failure")
+        echo "validation_result=$result" >> $GITHUB_ENV
 
     - name: Output validation results
-      run: echo "Validation check passed."
+      run: |
+        echo "Validation check: $validation_result"
