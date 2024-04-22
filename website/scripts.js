@@ -1,26 +1,38 @@
+// API base URL
+const API_URL = 'https://i1nk81bamc.execute-api.us-east-1.amazonaws.com/Prod/visits';
+
 // General utility functions
 function initialize() {
-    // Initialize functions for the entire site
-    fetchCount();  // Call specific functions like fetching counts
+    updateVisitorCount()
+        .then(fetchCount)
+        .catch(error => {
+            console.error("Error during initialization:", error);
+        });
+}
+
+// Function to update the visitor count
+async function updateVisitorCount() {
+    const response = await fetch(API_URL, { method: 'PUT' });
+    if (!response.ok) {
+        throw new Error('Network response was not ok: ' + response.statusText);
+    }
+    const data = await response.json();
+    console.log('Visitor count updated:', data);
 }
 
 // Fetch visitor count
-function fetchCount() {
-    const apiUrl = 'https://i1nk81bamc.execute-api.us-east-1.amazonaws.com/Prod/visits';
-    fetch(apiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            document.getElementById('visitorCount').textContent = data.count;
-        })
-        .catch(error => {
-            console.error('Error fetching the count:', error);
-            document.getElementById('visitorCount').textContent = 'Failed to load visitor count.';
-        });
+async function fetchCount() {
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        const data = await response.json();
+        document.getElementById('visitorCount').textContent = data.visitsCount;
+    } catch (error) {
+        console.error('Error fetching the count:', error);
+        document.getElementById('visitorCount').textContent = 'Failed to load visitor count.';
+    }
 }
 
 window.onload = initialize;
