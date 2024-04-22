@@ -45,7 +45,19 @@ jobs:
           echo "s3_website_validation_result=Website configuration is incorrect." >> $GITHUB_ENV
           exit 1
         fi
+    - name: Check DynamoDB Table Status
+      run: |
+        result=$(aws dynamodb describe-table --table-name kordis-cloud --query 'Table.TableStatus' --output text)
+        if [ "$result" == "ACTIVE" ]; then
+          echo "DynamoDB table configuration is active."
+          echo "dynamodb_table_status=DynamoDB table is active." >> $GITHUB_ENV
+        else
+          echo "DynamoDB table configuration is not active."
+          echo "dynamodb_table_status=DynamoDB table is not active." >> $GITHUB_ENV
+          exit 1
+        fi
     - name: Summarize Validation Outcomes
       run: |
         echo "Validation check: $validation_result"
         echo "S3 Bucket Website Configuration Check: $s3_website_validation_result"
+        echo "DynamoDB Table Status Check: $dynamodb_table_status"
