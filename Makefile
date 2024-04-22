@@ -26,4 +26,5 @@ run-VisitorCountGetFunction:
 # Run the VisitorCountPutFunction locally
 run-VisitorCountPutFunction:
 	@echo "Running the VisitorCountPutFunction locally..."
-	sam local invoke VisitorCountPutFunction --event events/event.json
+	sam build
+	sam local invoke VisitorCountPutFunction 

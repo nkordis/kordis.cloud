@@ -119,6 +119,9 @@ Resources:
           Properties:
             Path: /visits
             Method: put
+      Policies: 
+        - DynamoDBCrudPolicy:
+            TableName: kordis-cloud
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
