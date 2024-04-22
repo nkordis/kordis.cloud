@@ -45,6 +45,7 @@ jobs:
           echo "s3_website_validation_result=Website configuration is incorrect." >> $GITHUB_ENV
           exit 1
         fi
+
     - name: Check DynamoDB Table Status
       run: |
         result=$(aws dynamodb describe-table --table-name kordis-cloud --query 'Table.TableStatus' --output text)
@@ -56,8 +57,22 @@ jobs:
           echo "dynamodb_table_status=DynamoDB table is not active." >> $GITHUB_ENV
           exit 1
         fi
+    
+    - name: Invoke VisitorCountPutFunction
+      run: |
+        result=$(aws lambda invoke --function-name VisitorCountPutFunction --payload '{}' output.json)
+        echo "VisitorCountPutFunction response: $result" >> $GITHUB_ENV
+
+    - name: Invoke VisitorCountGetFunction
+      run: |
+        result=$(aws lambda invoke --function-name VisitorCountGetFunction --payload '{}' output.json)
+        echo "VisitorCountGetFunction response: $result" >> $GITHUB_ENV
+
     - name: Summarize Validation Outcomes
       run: |
         echo "Validation check: $validation_result"
         echo "S3 Bucket Website Configuration Check: $s3_website_validation_result"
         echo "DynamoDB Table Status Check: $dynamodb_table_status"
+        echo "VisitorCountPutFunction Response: ${{ env.VisitorCountPutFunction_response }}"
+        echo "VisitorCountGetFunction Response: ${{ env.VisitorCountGetFunction_response }}"
+        
