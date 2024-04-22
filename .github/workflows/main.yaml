@@ -57,22 +57,36 @@ jobs:
           echo "dynamodb_table_status=DynamoDB table is not active." >> $GITHUB_ENV
           exit 1
         fi
+
+    - name: Discover Lambda Functions
+      id: discover-functions
+      run: |
+        get_function=$(aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'kordis-cloud-VisitorCountGet')].FunctionName" --output text)
+        put_function=$(aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'kordis-cloud-VisitorCountPut')].FunctionName" --output text)
+        echo "::set-output name=get_function_name::$get_function"
+        echo "::set-output name=put_function_name::$put_function"
     
     - name: Invoke VisitorCountPutFunction
       run: |
-        result=$(aws lambda invoke --function-name kordis-cloud-VisitorCountPutFunction-93pkDPDzRma9 --payload '{}' output.json)
-        echo "VisitorCountPutFunction response: $result" >> $GITHUB_ENV
+        response_file="response-put.json"
+        aws lambda invoke --function-name ${{ steps.discover-functions.outputs.put_function_name }} --payload '{}' $response_file
+        cat $response_file
+        echo "VisitorCountPutFunction response logged above."
 
     - name: Invoke VisitorCountGetFunction
       run: |
-        result=$(aws lambda invoke --function-name kordis-cloud-VisitorCountGetFunction-S7H4b4ars0zf --payload '{}' output.json)
-        echo "VisitorCountGetFunction response: $result" >> $GITHUB_ENV
+        response_file="response-get.json"
+        aws lambda invoke --function-name ${{ steps.discover-functions.outputs.get_function_name }} --payload '{}' $response_file
+        cat $response_file
+        echo "VisitorCountGetFunction response logged above."
 
     - name: Summarize Validation Outcomes
       run: |
         echo "Validation check: $validation_result"
         echo "S3 Bucket Website Configuration Check: $s3_website_validation_result"
         echo "DynamoDB Table Status Check: $dynamodb_table_status"
-        echo "VisitorCountPutFunction Response: ${{ env.VisitorCountPutFunction_response }}"
-        echo "VisitorCountGetFunction Response: ${{ env.VisitorCountGetFunction_response }}"
+        echo "VisitorCountPutFunction Response: $(cat response-put.json)"
+        echo "VisitorCountGetFunction Response: $(cat response-get.json)"
+        
+        
         
