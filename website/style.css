@@ -30,7 +30,11 @@ section {
     border-bottom: 2px solid #eee;
 }
 
-h1, h2 {
+h1 {
+    color: #fff;
+}
+
+h2 {
     color: #333;
 }
 
