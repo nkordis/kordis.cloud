@@ -82,7 +82,7 @@ jobs:
         with:
           node-version: '16.14.0'
       - name: Install Dependencies
-        run: npm install --prefix ./dev-portfolio
+        run: npm install --prefix ./dev-portfolio --legacy-peer-deps
       - name: Build the website files
         run: npm run --prefix ./dev-portfolio build
       - name: Configure AWS credentials
