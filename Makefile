@@ -29,3 +29,8 @@ run-VisitorCountPutFunction:
 	@echo "Running the VisitorCountPutFunction locally..."
 	sam build
 	sam local invoke VisitorCountPutFunction 
+
+# Run python unit tests
+test:
+	@echo "Running Python tests..."
+	pytest -v tests\unit\test_handler.py
