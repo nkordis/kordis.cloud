@@ -71,6 +71,16 @@ Resources:
               OriginProtocolPolicy: match-viewer
         DefaultRootObject: index.html
         Enabled: true
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponsePagePath: /index.html
+            ResponseCode: 200
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 403
+            ResponsePagePath: /index.html
+            ResponseCode: 200
+            ErrorCachingMinTTL: 0
+
   
   KordisCloudCloutFrontAliasRecord:
     Type: AWS::Route53::RecordSet
