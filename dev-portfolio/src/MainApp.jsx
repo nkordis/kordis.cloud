@@ -3,6 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import FallbackSpinner from './components/FallbackSpinner';
 import NavBarWithRouter from './components/NavBar';
 import Home from './components/Home';
+import Footer from './components/Footer';
 import endpoints from './constants/endpoints';
 
 function MainApp() {
@@ -40,6 +41,7 @@ function MainApp() {
           </Suspense>
         </Switch>
       </main>
+      <Footer />
     </div>
   );
 }
