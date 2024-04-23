@@ -44,7 +44,7 @@ Resources:
   KordisCloudWildcardCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: "*.kordis.cloud"
+      DomainName: "kordis.cloud"
       ValidationMethod: DNS
 
   WebDistribution:
@@ -55,7 +55,7 @@ Resources:
           AcmCertificateArn: !Ref KordisCloudWildcardCertificate
           SslSupportMethod: sni-only
         Aliases:
-          - main.kordis.cloud
+          - kordis.cloud
         DefaultCacheBehavior:
           TargetOriginId: S3KordisCloudOrigin
           ViewerProtocolPolicy: redirect-to-https
@@ -76,7 +76,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: Z05030141Q82CAW2GKME0
-      Name: main.kordis.cloud
+      Name: kordis.cloud
       Type: A
       AliasTarget:
         DNSName: !GetAtt WebDistribution.DomainName
