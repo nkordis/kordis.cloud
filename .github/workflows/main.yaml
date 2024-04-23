@@ -18,75 +18,24 @@ jobs:
       with:
         python-version: '3.9'
 
+    - name: Cache Python packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install awscli boto3
-    
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+        pip install -r requirements.txt
+        pip install aws-sam-cli
+
+         
+    - name: Run tests
+      run: pytest -v tests/unit/test_handler.py
 
     - name: Validate CloudFormation template
-      run: |
-        result=$(aws cloudformation validate-template --template-body file://template.yaml > /dev/null && echo "success" || echo "failure")
-        echo "validation_result=$result" >> $GITHUB_ENV
-    
-    - name: Check S3 Bucket Website Configuration
-      run: |
-        result=$(aws s3api get-bucket-website --bucket kordis-cloud --query 'IndexDocument.Suffix' --output text)
-        if [ "$result" == "index.html" ]; then
-          echo "Website configuration is correct."
-          echo "s3_website_validation_result=Website configuration is correct." >> $GITHUB_ENV
-        else
-          echo "Website configuration is incorrect."
-          echo "s3_website_validation_result=Website configuration is incorrect." >> $GITHUB_ENV
-          exit 1
-        fi
-
-    - name: Check DynamoDB Table Status
-      run: |
-        result=$(aws dynamodb describe-table --table-name kordis-cloud --query 'Table.TableStatus' --output text)
-        if [ "$result" == "ACTIVE" ]; then
-          echo "DynamoDB table configuration is active."
-          echo "dynamodb_table_status=DynamoDB table is active." >> $GITHUB_ENV
-        else
-          echo "DynamoDB table configuration is not active."
-          echo "dynamodb_table_status=DynamoDB table is not active." >> $GITHUB_ENV
-          exit 1
-        fi
-
-    - name: Discover Lambda Functions
-      id: discover-functions
-      run: |
-        get_function=$(aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'kordis-cloud-VisitorCountGet')].FunctionName" --output text)
-        put_function=$(aws lambda list-functions --query "Functions[?starts_with(FunctionName, 'kordis-cloud-VisitorCountPut')].FunctionName" --output text)
-        echo "::set-output name=get_function_name::$get_function"
-        echo "::set-output name=put_function_name::$put_function"
-    
-    - name: Invoke VisitorCountPutFunction
-      run: |
-        response_file="response-put.json"
-        aws lambda invoke --function-name ${{ steps.discover-functions.outputs.put_function_name }} --payload '{}' $response_file
-        cat $response_file
-        echo "VisitorCountPutFunction response logged above."
-
-    - name: Invoke VisitorCountGetFunction
-      run: |
-        response_file="response-get.json"
-        aws lambda invoke --function-name ${{ steps.discover-functions.outputs.get_function_name }} --payload '{}' $response_file
-        cat $response_file
-        echo "VisitorCountGetFunction response logged above."
-
-    - name: Summarize Validation Outcomes
-      run: |
-        echo "Validation check: $validation_result"
-        echo "S3 Bucket Website Configuration Check: $s3_website_validation_result"
-        echo "DynamoDB Table Status Check: $dynamodb_table_status"
-        echo "VisitorCountPutFunction Response: $(cat response-put.json)"
-        echo "VisitorCountGetFunction Response: $(cat response-get.json)"
-        
-        
-        
+      run: sam  validate
