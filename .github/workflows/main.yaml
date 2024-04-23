@@ -77,6 +77,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.14.0'
+      - name: Install Dependencies
+        run: npm install --prefix ./dev-portfolio
       - name: Build the website files
         run: npm run --prefix ./dev-portfolio build
       - name: Configure AWS credentials
