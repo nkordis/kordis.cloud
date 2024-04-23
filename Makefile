@@ -13,10 +13,11 @@ deploy:
 	@echo "Deploying the SAM application..."
 	sam deploy 
 
-# Deploy the website files to S3 bucket, syncing only HTML and CSS files
+# Deploy the website files to S3 bucket
 deploy-site:
 	@echo "Deploying the website files..."
-	"C:\Program Files\Amazon\AWSCLIV2\aws" s3 sync ./website s3://kordis-cloud 
+	npm run --prefix ./dev-portfolio build
+	"C:\Program Files\Amazon\AWSCLIV2\aws" s3 sync ./dev-portfolio/build s3://kordis-cloud --delete
 
 # Run the VisitorCountGetFunction locally
 run-VisitorCountGetFunction:
