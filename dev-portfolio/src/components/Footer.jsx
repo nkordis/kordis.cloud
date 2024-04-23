@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'https://i1nk81bamc.execute-api.us-east-1.amazonaws.com/Prod/visits';
+const API_URL = 'https://api.kordis.cloud/prod/visits';
 
 const styles = {
   footerContainer: {
