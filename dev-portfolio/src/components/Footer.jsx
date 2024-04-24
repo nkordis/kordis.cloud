@@ -41,7 +41,7 @@ const Footer = () => {
 
   return (
     <div style={styles.footerContainer}>
-      Visitors:
+      Visits:
       {' '}
       {visitorCount}
     </div>
