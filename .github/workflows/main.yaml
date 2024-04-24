@@ -142,6 +142,7 @@ jobs:
           # Download and install Chrome
           wget -q https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.78/linux64/chrome-linux64.zip
           sudo unzip chrome-linux64.zip -d /opt/chrome/
+          sudo rm -f /usr/bin/google-chrome 
           sudo ln -s /opt/chrome/chrome /usr/bin/google-chrome
           rm chrome-linux64.zip
 
