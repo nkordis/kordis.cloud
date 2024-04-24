@@ -141,14 +141,14 @@ jobs:
           sudo apt-get update
           # Download and install Chrome
           wget -q https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.78/linux64/chrome-linux64.zip
-          sudo unzip chrome-linux64.zip -d /opt/chrome/
-          sudo rm -f /usr/bin/google-chrome 
+          sudo unzip -q chrome-linux64.zip -d /opt/chrome/
+          sudo rm -f /usr/bin/google-chrome
           sudo ln -s /opt/chrome/chrome /usr/bin/google-chrome
           rm chrome-linux64.zip
 
           # Download and install ChromeDriver
           wget -q https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.78/linux64/chromedriver-linux64.zip
-          sudo unzip chromedriver-linux64.zip -d /usr/local/bin/
+          sudo unzip -q chromedriver-linux64.zip -d /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           rm chromedriver-linux64.zip
 
