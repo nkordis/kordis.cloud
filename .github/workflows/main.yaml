@@ -147,8 +147,10 @@ jobs:
 
           # Download and install ChromeDriver
           wget -q https://storage.googleapis.com/chrome-for-testing-public/124.0.6367.78/linux64/chromedriver-linux64.zip
-          sudo unzip -q chromedriver-linux64.zip -d /usr/local/bin/
+          sudo unzip -q chromedriver-linux64.zip -d /tmp/
+          sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
           sudo chmod +x /usr/local/bin/chromedriver
+          sudo rm -r /tmp/chromedriver-linux64/
           rm chromedriver-linux64.zip
 
       - name: Run E2E Tests
