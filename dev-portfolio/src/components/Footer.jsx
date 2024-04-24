@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = 'https://api.kordis.cloud/prod/visits';
+const API_URL = 'https://api.kordis.cloud/visits';
 
 const styles = {
   footerContainer: {

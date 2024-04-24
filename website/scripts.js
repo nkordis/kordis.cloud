@@ -1,5 +1,5 @@
 // API base URL
-const API_URL = 'https://api.kordis.cloud/prod/visits';
+const API_URL = 'https://api.kordis.cloud/visits';
 
 // General utility functions
 function initialize() {
