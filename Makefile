@@ -1,5 +1,7 @@
 .PHONY: all build deploy
 
+STACK_NAME=kordis-cloud
+
 # Define the default action to build and deploy
 all: build deploy
 
@@ -32,6 +34,11 @@ run-VisitorCountPutFunction:
 	sam local invoke VisitorCountPutFunction 
 
 # Run python unit tests
-test:
-	@echo "Running Python tests..."
-	pytest -v tests\unit\test_handler.py
+unit-tests:
+	@echo "Running Python unit tests..."
+	pytest -vv tests\unit\test_handler.py
+
+# Run python integration tests
+integration-tests:
+	@echo "Running Python integration tests..."
+	@set AWS_SAM_STACK_NAME=kordis-cloud&& pytest -vv tests/integration/test_api_gateway.py"
