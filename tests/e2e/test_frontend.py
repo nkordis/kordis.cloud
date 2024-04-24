@@ -7,7 +7,7 @@ from selenium.common.exceptions import WebDriverException
 
 def setup_driver():
     options = Options()
-    options.headless = True
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')  # Bypass OS security model
     options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
     options.add_argument('--disable-gpu')  # Disable GPU hardware acceleration
@@ -18,7 +18,7 @@ def setup_driver():
 
     try:
         # Create a new instance of the Chrome driver
-        driver = webdriver.Chrome(options=options)
+        driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=options)
         return driver
     except WebDriverException as e:
         print(f"Error initializing the Chrome driver: {str(e)}")
