@@ -59,7 +59,7 @@ Resources:
           SslSupportMethod: sni-only
         Aliases:
           - kordis.cloud
-            www.kordis.cloud
+          - www.kordis.cloud
         DefaultCacheBehavior:
           TargetOriginId: S3KordisCloudOrigin
           ViewerProtocolPolicy: redirect-to-https
