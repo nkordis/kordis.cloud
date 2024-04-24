@@ -119,6 +119,9 @@ Resources:
         CertificateArn: !Ref KordisCloudWildcardCertificate
         Route53:
           HostedZoneId: Z05030141Q82CAW2GKME0 
+      Auth:
+        DefaultAuthorizer: NONE
+        AddDefaultAuthorizerToCorsPreflight: false
           
   VisitorCountGetFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
