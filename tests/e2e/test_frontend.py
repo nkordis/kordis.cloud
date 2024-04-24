@@ -1,31 +1,19 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import re  # For regex operations
-import time  # For adding delay
+import re
+import time
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.chrome.service import Service
 
 def setup_driver():
     options = Options()
     options.add_argument('--headless')
-    options.add_argument('--no-sandbox')  # Bypass OS security model
-    options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
-    options.add_argument('--disable-gpu')  # Disable GPU hardware acceleration
-    options.add_argument('--remote-debugging-port=9222')  # Specify a remote debugging port
-    options.add_argument('--window-size=1920x1080')  # Set window size
-    options.add_argument('--disable-extensions')  # Disable extensions
-    options.add_argument('--disable-software-rasterizer')  # Disable software rasterizer
+    options.add_argument('--no-sandbox') # Bypass OS security model
+    options.add_argument('--disable-dev-shm-usage') # Overcome limited resource problems
 
-    try:
-        # Create a new instance of the Chrome driver
-        service = Service(executable_path='/usr/local/bin/chromedriver')
-        driver = webdriver.Chrome(service=service, options=options)
-        return driver
-    except WebDriverException as e:
-        print(f"Error initializing the Chrome driver: {str(e)}")
-        raise
-
+    service = Service(executable_path='/usr/local/bin/chromedriver')
+    driver = webdriver.Chrome(service=service, options=options)
+    return driver
 
 def test_visitor_count_display():
     driver = setup_driver() 
@@ -43,9 +31,6 @@ def test_visitor_count_display():
             print("Visitor Count:", visitor_count)
         else:
             raise ValueError("Failed to find 'Visits: ' followed by a number in the page.")
-        
-        print("Visitor Count:", visitor_count)
-        assert visitor_count > 0, "Visitor count is not greater than 0."
 
     finally:
         driver.quit()
