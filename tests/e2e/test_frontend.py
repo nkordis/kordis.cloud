@@ -18,7 +18,7 @@ def setup_driver():
 
     try:
         # Create a new instance of the Chrome driver
-        driver = webdriver.Chrome(options=options, executable_path='/usr/local/bin/chromedriver')
+        driver = webdriver.Chrome(options=options)
         return driver
     except WebDriverException as e:
         print(f"Error initializing the Chrome driver: {str(e)}")
