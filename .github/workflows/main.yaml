@@ -136,13 +136,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest selenium
 
-      - name: Set up Chrome browser
+      - name: Install Chrome and ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip
-          sudo wget https://chromedriver.storage.googleapis.com/2.41/chromedriver_linux64.zip
-          sudo unzip chromedriver_linux64.zip -d /usr/local/bin/
           sudo apt-get install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | cut -d ' ' -f 3 | cut -d '.' -f 1)
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+          wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+          sudo unzip chromedriver_linux64.zip -d /usr/local/bin/
           sudo rm chromedriver_linux64.zip
 
       - name: Run E2E Tests
