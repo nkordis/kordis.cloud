@@ -91,7 +91,7 @@ Resources:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: Z05030141Q82CAW2GKME0
-      Name: temp.kordis.cloud
+      Name: kordis.cloud
       Type: A
       AliasTarget:
         DNSName: !GetAtt WebDistribution.DomainName
