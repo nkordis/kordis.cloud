@@ -43,7 +43,7 @@ integration-tests:
 	@echo "Running Python integration tests..."
 	@set AWS_SAM_STACK_NAME=kordis-cloud&& pytest -vv tests/integration/test_api_gateway.py"
 
-# Run end-to-end tests with pytest and selenium
+# Run end-to-end tests with pytest and selenium(Remove the service with the path when running on Windows)
 e2e-tests:
 	@echo "Running end-to-end tests..."
 	pytest tests\e2e\
