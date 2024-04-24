@@ -4,6 +4,7 @@ import re  # For regex operations
 import time  # For adding delay
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.service import Service
 
 def setup_driver():
     options = Options()
@@ -18,7 +19,8 @@ def setup_driver():
 
     try:
         # Create a new instance of the Chrome driver
-        driver = webdriver.Chrome(executable_path='/usr/local/bin/chromedriver', options=options)
+        service = Service(executable_path='/usr/local/bin/chromedriver')
+        driver = webdriver.Chrome(service=service, options=options)
         return driver
     except WebDriverException as e:
         print(f"Error initializing the Chrome driver: {str(e)}")
