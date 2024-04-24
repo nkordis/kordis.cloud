@@ -87,11 +87,30 @@ Resources:
             ResponseCode: 200
             ErrorCachingMinTTL: 0
  
-  KordisCloudAliasRecord:
+  KordisCloudDNSRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: Z05030141Q82CAW2GKME0
+      RecordSets:
+        - Name: kordis.cloud
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt WebDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+            EvaluateTargetHealth: false
+        - Name: www.kordis.cloud
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt WebDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+            EvaluateTargetHealth: false
+
+  
+  WWWKordisCloudAliasRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: Z05030141Q82CAW2GKME0
-      Name: kordis.cloud
+      Name: "www.kordis.cloud"
       Type: A
       AliasTarget:
         DNSName: !GetAtt WebDistribution.DomainName
