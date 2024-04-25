@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - dev
 
 jobs:
   test-infra:
@@ -157,3 +158,21 @@ jobs:
         run: pytest tests/e2e/
         env:
           PYTHONPATH: ${{ github.workspace }}
+
+  auto-merge-to-main:
+    needs: [test-infra, build-deploy-infra, integration-tests, deploy-site, e2e-tests]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' # Ensures this job only runs on the dev branch
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: 'dev'
+      - name: Merge dev to main
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git fetch origin main:main
+          git checkout main
+          git merge --no-ff dev -m "Merge dev to main [skip ci]"
+          git push origin main
