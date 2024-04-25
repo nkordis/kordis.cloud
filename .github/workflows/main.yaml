@@ -174,5 +174,5 @@ jobs:
           git config --global user.email 'actions@github.com'
           git fetch origin main:main
           git checkout main
-          git merge --no-ff dev -m "Merge dev to main [skip ci]"
+          git merge --no-ff dev -m "Merge dev to main [skip ci]" --allow-unrelated-histories
           git push origin main
