@@ -3,8 +3,10 @@ name: main
 on:
   push:
     branches:
-      - main
       - dev
+
+permissions: 
+  contents: write  # Grant write permissions to modify repository contents
 
 jobs:
   test-infra:
@@ -168,11 +170,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: 'dev'
+          fetch-depth: 0
+          
+      - name: Setup Git User
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
       - name: Merge dev to main
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'actions@github.com'
-          git fetch origin main:main
+          git fetch origin
           git checkout main
-          git merge --no-ff dev -m "Merge dev to main [skip ci]" --allow-unrelated-histories
+          git merge --no-ff dev -m "Merge dev to main [skip ci]"
           git push origin main
