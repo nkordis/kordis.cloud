@@ -1,130 +1,106 @@
-# kordis.cloud
+# kordis.cloud: A Serverless Portfolio Website
 
-This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
+ This repository houses the source code and configuration files for deploying kordis.cloud, a serverless, cloud-based portfolio website utilizing the AWS Serverless Application Model (SAM). It incorporates a comprehensive suite of AWS services to ensure a scalable, secure, and high-performance web presence.
 
-- hello_world - Code for the application's Lambda function.
-- events - Invocation events that you can use to invoke the function.
-- tests - Unit tests for the application code. 
-- template.yaml - A template that defines the application's AWS resources.
+  Visit the live site at [https://kordis.cloud](https://kordis.cloud).
 
-The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
+  ![kordis.cloud Website](dev-portfolio/public/images/projects/kordis-cloud.png)
 
-If you prefer to use an integrated development environment (IDE) to build and test your application, you can use the AWS Toolkit.  
-The AWS Toolkit is an open source plug-in for popular IDEs that uses the SAM CLI to build and deploy serverless applications on AWS. The AWS Toolkit also adds a simplified step-through debugging experience for Lambda function code. See the following links to get started.
+## Components Overview
 
-* [CLion](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [GoLand](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [IntelliJ](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [WebStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [Rider](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PhpStorm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [PyCharm](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [RubyMine](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [DataGrip](https://docs.aws.amazon.com/toolkit-for-jetbrains/latest/userguide/welcome.html)
-* [VS Code](https://docs.aws.amazon.com/toolkit-for-vscode/latest/userguide/welcome.html)
-* [Visual Studio](https://docs.aws.amazon.com/toolkit-for-visual-studio/latest/user-guide/welcome.html)
+ -  **Backend:** Serverless Lambda functions, written in Python 3.9, manage functionalities such as visitor tracking. The code for these functions can be found in the `visitor_get_function` and `visitor_put_function` directories.
 
-## Deploy the sample application
+-  **Database:** Amazon DynamoDB is used to store essential data like visitor counts, providing fast and scalable performance.
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+-  **Content Delivery Network (CDN):** Amazon CloudFront distributes static website content, ensuring efficient content delivery with reduced latency across the globe.
 
-To use the SAM CLI, you need the following tools.
+-  **API Gateway:** This service offers a secure and scalable endpoint for frontend interactions with the backend, efficiently managing API traffic.
 
-* SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
-* [Python 3 installed](https://www.python.org/downloads/)
-* Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+-  **DNS Management:** Amazon Route 53 handles DNS records for the domain, directing user requests to the appropriate AWS infrastructure.
 
-To build and deploy your application for the first time, run the following in your shell:
+-  **Storage and Static Hosting:** Amazon S3 hosts static assets and content for the website, including HTML, CSS, and JavaScript files, ensuring reliable storage and retrieval. S3 also serves as the static website host, delivering content directly to visitors.
 
-```bash
+-  **Frontend:** Developed with React.js, a modern web framework for a dynamic and interactive experience, detailed in the [web-portfolio README](web-portfolio/README.md). This component is adapted from the [jOlson's repository](https://github.com/johnolson2219/jOlson), updated to include a footer component that integrates visitor tracking functionality.
+
+-  **Infrastructure Management:** All AWS resources utilized by the application are defined and orchestrated via the `template.yaml` file with AWS SAM, facilitating streamlined deployment and management.
+
+-  **Additional Tools and Services:** The project uses AWS Certificate Manager (ACM) for handling SSL/TLS certificates and AWS IAM for managing access controls, ensuring secure and efficient operations.
+
+## Application Deployment
+
+The AWS Serverless Application Model (SAM) CLI is an extension of the AWS CLI that simplifies the process of building and deploying serverless applications using Docker to emulate the AWS environment. Here's what you need to get started:
+
+-  **SAM CLI** - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+
+-  **Python 3.9** - [Install Python](https://www.python.org/downloads/)
+
+-  **Docker** - [Install Docker Community Edition](https://hub.docker.com/search/?type=edition&offering=community)
+
+To deploy the application for the first time, execute the following commands:
+```
 sam build --use-container
-sam deploy --guided
+sam deploy --guided`
+```
+  These commands will compile your application source and then package and deploy it to AWS. The deployment process will prompt you for:
+
+  -  **Stack Name**: Name your stack, typically aligning with your project name, such as "kordis-cloud".
+
+-  **AWS Region**: Select the AWS region where your application will be deployed.
+
+-  **Confirm changes before deploy**: Choose whether to review changes before they are deployed.
+
+-  **Allow SAM CLI IAM role creation**: Permissions must be explicitly granted to create or modify IAM roles using the `--capabilities CAPABILITY_IAM` flag.
+
+-  **Save arguments to samconfig.toml**: Optionally save your settings to a config file to streamline future deployments.
+
+  
+Post-deployment, your API Gateway Endpoint URL will be displayed, providing access to your application.
+
+## Testing Strategy
+
+Testing is a crucial part of ensuring the reliability and stability of the kordis.cloud application. Our testing approach includes:
+
+ -  **Unit Tests:** These test individual components or functions in isolation to ensure that each part performs as expected.
+
+-  **Integration Tests:** These tests check the interaction between components and services to verify that they work together correctly.
+
+-  **End-to-End Tests (E2E):** Simulating real user scenarios, these tests cover the complete flow of the application to ensure that the system meets all business requirements.
+
+  
+
+Tests are defined in the `tests` folder. To run these tests, install the required dependencies and execute the test commands:
+
+```
+pip install -r tests/requirements.txt --user
+
+python -m pytest tests/unit -v
+
+python -m pytest tests/integration -v
+
+python -m pytest tests/e2e -v
+
 ```
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
+## Continuous Integration and Deployment (CI/CD)
 
-* **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
-* **AWS Region**: The AWS region you want to deploy your app to.
-* **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
-* **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
-* **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
+The CI/CD pipeline is managed through GitHub Actions, automating the testing, building, and deployment phases to ensure a seamless workflow and high availability of the application. The process is triggered by pushes to the `dev` branch, following this sequence:
 
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
+-  **Test Infrastructure:** Validates and tests new code commits using unit and tests.
 
-## Use the SAM CLI to build and test locally
+-  **Build and Deploy Infrastructure:** Once tests pass, the infrastructure code is built and deployed using AWS SAM.
 
-Build your application with the `sam build --use-container` command.
+-  **Integration and E2E Testing:** After deployment, further integration and E2E tests ensure the entire system functions as expected.
 
-```bash
-cloud-resume-challenge$ sam build --use-container
-```
+-  **Deploy Site:** Frontend assets are built and synced to an S3 bucket for static hosting.
 
-The SAM CLI installs dependencies defined in `hello_world/requirements.txt`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+-  **E2E Testing:** The E2E tests utilize the Selenium for Python framework to test the frontend, verifying that the application behaves as expected under production-like circumstances.
 
-Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
+-  **Auto-Merge to Main:** Successful deployments and tests trigger an automatic merge from `dev` to `main` to ensure that the main branch always reflects a stable and tested state.
 
-Run functions locally and invoke them with the `sam local invoke` command.
+This CI/CD setup ensures that all code pushed to production is thoroughly tested and stable, reducing the risk of issues affecting users and improving the overall quality of the application
 
-```bash
-cloud-resume-challenge$ sam local invoke HelloWorldFunction --event events/event.json
-```
+## Additional Resources
 
-The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
+For more information on SAM and serverless concepts, refer to the [AWS SAM Developer Guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html).
 
-```bash
-cloud-resume-challenge$ sam local start-api
-cloud-resume-challenge$ curl http://localhost:3000/
-```
-
-The SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
-
-```yaml
-      Events:
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /hello
-            Method: get
-```
-
-## Add a resource to your application
-The application template uses AWS Serverless Application Model (AWS SAM) to define application resources. AWS SAM is an extension of AWS CloudFormation with a simpler syntax for configuring common serverless application resources such as functions, triggers, and APIs. For resources not included in [the SAM specification](https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md), you can use standard [AWS CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-template-resource-type-ref.html) resource types.
-
-## Fetch, tail, and filter Lambda function logs
-
-To simplify troubleshooting, SAM CLI has a command called `sam logs`. `sam logs` lets you fetch logs generated by your deployed Lambda function from the command line. In addition to printing the logs on the terminal, this command has several nifty features to help you quickly find the bug.
-
-`NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
-
-```bash
-cloud-resume-challenge$ sam logs -n HelloWorldFunction --stack-name "cloud-resume-challenge" --tail
-```
-
-You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
-
-## Tests
-
-Tests are defined in the `tests` folder in this project. Use PIP to install the test dependencies and run tests.
-
-```bash
-cloud-resume-challenge$ pip install -r tests/requirements.txt --user
-# unit test
-cloud-resume-challenge$ python -m pytest tests/unit -v
-# integration test, requiring deploying the stack first.
-# Create the env variable AWS_SAM_STACK_NAME with the name of the stack we are testing
-cloud-resume-challenge$ AWS_SAM_STACK_NAME="cloud-resume-challenge" python -m pytest tests/integration -v
-```
-
-## Cleanup
-
-To delete the sample application that you created, use the AWS CLI. Assuming you used your project name for the stack name, you can run the following:
-
-```bash
-sam delete --stack-name "cloud-resume-challenge"
-```
-
-## Resources
-
-See the [AWS SAM developer guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html) for an introduction to SAM specification, the SAM CLI, and serverless application concepts.
-
-Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
+Explore more advanced serverless applications through the [AWS Serverless Application Repository](https://aws.amazon.com/serverless/serverlessrepo/).
