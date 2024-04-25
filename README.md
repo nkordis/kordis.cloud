@@ -1,10 +1,13 @@
 # kordis.cloud: A Serverless Portfolio Website
 
- This repository houses the source code and configuration files for deploying kordis.cloud, a serverless, cloud-based portfolio website utilizing the AWS Serverless Application Model (SAM). It incorporates a comprehensive suite of AWS services to ensure a scalable, secure, and high-performance web presence.
+[![CI Status](https://github.com/nkordis/kordis.cloud/actions/workflows/main.yaml/badge.svg)](https://github.com/nkordis/kordis.cloud/actions)
 
-  Visit the live site at [https://kordis.cloud](https://kordis.cloud).
 
-  ![kordis.cloud Website](dev-portfolio/public/images/projects/kordis-cloud.png)
+This repository houses the source code and configuration files for deploying kordis.cloud, a serverless, cloud-based portfolio website utilizing the AWS Serverless Application Model (SAM). It incorporates a comprehensive suite of AWS services to ensure a scalable, secure, and high-performance web presence.
+
+Visit the live site at [https://kordis.cloud](https://kordis.cloud).
+
+![kordis.cloud Website](dev-portfolio/public/images/projects/kordis-cloud.png)
 
 ## Components Overview
 
