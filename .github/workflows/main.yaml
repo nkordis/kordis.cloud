@@ -179,7 +179,7 @@ jobs:
         run: npm install -g conventional-changelog-cli
 
       - name: Generate changelog
-        run: conventional-changelog -p angular -i CHANGELOG.md -s -r 0 --type all
+        run: conventional-changelog -p angular -i CHANGELOG.md -s
 
       - name: Commit changelog
         run: |
