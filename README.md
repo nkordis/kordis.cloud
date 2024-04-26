@@ -98,8 +98,6 @@ The CI/CD pipeline is managed through GitHub Actions, automating the testing, bu
 
 -  **E2E Testing:** The E2E tests utilize the Selenium for Python framework to test the frontend, verifying that the application behaves as expected under production-like circumstances.
 
--   **Changelog Update:** Automatically updates the `CHANGELOG.md` file to include new changes based on conventional commit messages. This step ensures that all significant changes are documented properly and appended to the changelog before merging to the main branch.
-
 -  **Auto-Merge to Main:** Successful deployments and tests trigger an automatic merge from `dev` to `main` to ensure that the main branch always reflects a stable and tested state.
 
 This CI/CD setup ensures that all code pushed to production is thoroughly tested and stable, reducing the risk of issues affecting users and improving the overall quality of the application
