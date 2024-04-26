@@ -107,25 +107,22 @@ Resources:
             ResponseCode: 200
             ErrorCachingMinTTL: 0
  
-  KordisCloudAliasRecord:
-    Type: AWS::Route53::RecordSet
+  Route53RecordSetGroup:
+    Type: AWS::Route53::RecordSetGroup
     Properties:
       HostedZoneId: !Ref HostedZoneId
-      Name: !Ref DomainName
-      Type: A
-      AliasTarget:
-        DNSName: !GetAtt WebDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2 # This typically refers to the CloudFront distribution and should not be parameterized
-  
-  WWWKordisCloudAliasRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneId: !Ref HostedZoneId
-      Name: !Sub "www.${DomainName}"
-      Type: A
-      AliasTarget:
-        DNSName: !GetAtt WebDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2 # This typically refers to the CloudFront distribution and should not be parameterized
+      RecordSets:
+        - Name: !Ref DomainName
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt WebDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2 # This typically refers to the CloudFront distribution and should not be parameterized
+
+        - Name: !Sub "www.${DomainName}"
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt WebDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2 # This typically refers to the CloudFront distribution and should not be parameterized
 
   KordisCloudBucketPolicy:
     Type: AWS::S3::BucketPolicy
