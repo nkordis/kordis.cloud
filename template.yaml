@@ -5,6 +5,28 @@ Description: >
 
   Sample SAM Template for kordis.cloud
 
+Parameters:
+  DomainName:
+    Type: String
+    Default: "kordis.cloud"
+    Description: The root domain name for the service.
+  
+  HostedZoneId:
+    Type: String
+    Default: "Z05030141Q82CAW2GKME0"
+    Description: "The Hosted Zone ID for the DNS records in Route 53."
+  
+  DynamoDBTableName:
+    Type: String
+    Default: "kordis-cloud"
+    Description: The name of the DynamoDB table.
+
+  S3BucketName:
+    Type: String
+    Default: "kordis-cloud"
+    Description: The name of the S3 bucket for static content.
+
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
@@ -21,17 +43,17 @@ Resources:
   KordisCloudWildcardCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
-      DomainName: "*.kordis.cloud"
-      SubjectAlternativeNames:  
-      - "kordis.cloud"
+      DomainName: !Sub "*.${DomainName}"
+      SubjectAlternativeNames:
+      - !Ref DomainName
       ValidationMethod: DNS
 
   KordisCloudBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: kordis-cloud
+      BucketName: !Ref S3BucketName
       WebsiteConfiguration:
-        IndexDocument: index.html     
+        IndexDocument: index.html
       PublicAccessBlockConfiguration:
         BlockPublicAcls: false
         IgnorePublicAcls: false
@@ -41,7 +63,7 @@ Resources:
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: kordis-cloud
+      TableName: !Ref DynamoDBTableName
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: id
@@ -58,8 +80,8 @@ Resources:
           AcmCertificateArn: !Ref KordisCloudWildcardCertificate
           SslSupportMethod: sni-only
         Aliases:
-          - kordis.cloud
-          - www.kordis.cloud
+          - !Ref DomainName
+          - !Sub "www.${DomainName}"
         DefaultCacheBehavior:
           TargetOriginId: S3KordisCloudOrigin
           ViewerProtocolPolicy: redirect-to-https
@@ -88,22 +110,22 @@ Resources:
   KordisCloudAliasRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId: Z05030141Q82CAW2GKME0
-      Name: kordis.cloud
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
       Type: A
       AliasTarget:
         DNSName: !GetAtt WebDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2
+        HostedZoneId: Z2FDTNDATAQYW2 # This typically refers to the CloudFront distribution and should not be parameterized
   
   WWWKordisCloudAliasRecord:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneId: Z05030141Q82CAW2GKME0
-      Name: www.kordis.cloud
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Sub "www.${DomainName}"
       Type: A
       AliasTarget:
         DNSName: !GetAtt WebDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2
+        HostedZoneId: Z2FDTNDATAQYW2 # This typically refers to the CloudFront distribution and should not be parameterized
 
   KordisCloudBucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -123,10 +145,10 @@ Resources:
     Properties:
       StageName: prod
       Domain: 
-        DomainName: api.kordis.cloud
+        DomainName: !Sub "api.${DomainName}"
         CertificateArn: !Ref KordisCloudWildcardCertificate
         Route53:
-          HostedZoneId: Z05030141Q82CAW2GKME0 
+          HostedZoneId: !Ref HostedZoneId 
       Auth:
         DefaultAuthorizer: NONE
         AddDefaultAuthorizerToCorsPreflight: false
@@ -149,7 +171,7 @@ Resources:
               Ref: ApiGatewayApi
       Policies: 
         - DynamoDBCrudPolicy:
-            TableName: kordis-cloud
+            TableName: !Ref DynamoDBTableName
   
   VisitorCountPutFunction:
     Type: AWS::Serverless::Function
@@ -169,7 +191,7 @@ Resources:
               Ref: ApiGatewayApi
       Policies: 
         - DynamoDBCrudPolicy:
-            TableName: kordis-cloud
+            TableName: !Ref DynamoDBTableName
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -177,7 +199,7 @@ Outputs:
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   KordisCloudAPI:
     Description: "API Gateway endpoint URL for kordis.cloud"
-    Value: "https://api.kordis.cloud/"
+    Value: !Sub "https://api.${DomainName}/"
   VisitorCountApi:
     Description: "API Gateway endpoint URL for Prod stage for Visitor Count function"
     Value: !Sub "https://${VisitorCountGetFunction}.execute-api.${AWS::Region}.amazonaws.com/Prod/visits/"
