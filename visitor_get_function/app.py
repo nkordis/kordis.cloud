@@ -9,7 +9,7 @@ patch_all()
 
 # Initialize a DynamoDB client
 dynamodb = boto3.resource('dynamodb')
-
+@xray_recorder.capture('lambda_handler')
 def lambda_handler(event, context):
 
     # Capture log event information for monitoring and analysis
@@ -22,10 +22,11 @@ def lambda_handler(event, context):
     table = dynamodb.Table('kordis-cloud')
 
     try:
-        # Attempt to retrieve the item from the table
-        response = table.get_item(
-            Key={'id': 'visits'}
-        )
+        with xray_recorder.capture('get_item'):
+            # Attempt to retrieve the item from the table
+            response = table.get_item(
+                Key={'id': 'visits'}
+            )
         # Check if the item was found
         if 'Item' in response:
             visit_count = int(response['Item'].get('visitsCount', 0))

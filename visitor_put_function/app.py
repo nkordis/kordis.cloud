@@ -9,6 +9,7 @@ patch_all()
 
 # Initialize a DynamoDB client
 dynamodb = boto3.resource('dynamodb')
+@xray_recorder.capture('lambda_handler')
 def lambda_handler(event, context):
 
     # Capture log event information for monitoring and analysis
@@ -21,19 +22,20 @@ def lambda_handler(event, context):
     table = dynamodb.Table('kordis-cloud')
 
     try:
+        with xray_recorder.capture('put_item'):
         # Attempt to update the item in the table
-        response = table.update_item(
-            Key={
-                'id': 'visits'
-            },
-            UpdateExpression='SET visitsCount = if_not_exists(visitsCount, :start) + :inc',
-            ExpressionAttributeValues={
-                ':inc': 1,
-                ':start': 0
-            },
-            ReturnValues='UPDATED_NEW'
-        )
-        # Return the updated value
+            response = table.update_item(
+                Key={
+                    'id': 'visits'
+                },
+                UpdateExpression='SET visitsCount = if_not_exists(visitsCount, :start) + :inc',
+                ExpressionAttributeValues={
+                    ':inc': 1,
+                    ':start': 0
+                },
+                ReturnValues='UPDATED_NEW'
+            )
+            # Return the updated value
         return {
             'statusCode': 200,
             "headers": {
