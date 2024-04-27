@@ -1,6 +1,11 @@
 import boto3
 from botocore.exceptions import ClientError
 import json
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
+# Patch the supported libraries (e.g., boto3) to enable tracing
+patch_all()
 
 # Initialize a DynamoDB client
 dynamodb = boto3.resource('dynamodb')
