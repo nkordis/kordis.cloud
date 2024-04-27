@@ -25,13 +25,13 @@ deploy-site:
 run-VisitorCountGetFunction:
 	@echo "Running the VisitorCountGetFunction locally..."
 	sam build
-	sam local invoke VisitorCountGetFunction 
+	sam local invoke VisitorCountGetFunction --event events/getVisitsEvent.json
 
 # Run the VisitorCountPutFunction locally
 run-VisitorCountPutFunction:
 	@echo "Running the VisitorCountPutFunction locally..."
 	sam build
-	sam local invoke VisitorCountPutFunction 
+	sam local invoke VisitorCountPutFunction --event events/putVisitsEvent.json
 
 # Run python unit tests
 unit-tests:

@@ -156,6 +156,7 @@ Resources:
       CodeUri: visitor_get_function/
       Handler: app.lambda_handler
       Runtime: python3.9
+      Timeout: 10
       Architectures:
         - x86_64
       Events:
@@ -178,6 +179,7 @@ Resources:
       Runtime: python3.9
       Architectures:
         - x86_64
+      Timeout: 10
       Events:
         UpdateVisits:
           Type: Api

@@ -37,7 +37,12 @@ def apigw_event_put():
     return {
         "body": json.dumps({}),  # Assuming no specific body is required
         "httpMethod": "PUT",
-        "path": "/visits"
+        "path": "/visits",
+        "requestContext": {
+            "identity": {
+                "sourceIp": "123.123.123.123"
+            }
+        }
     }
 
 @pytest.fixture()
@@ -46,7 +51,12 @@ def apigw_event_get():
     return {
         "body": None,  # GET requests typically don't have a body
         "httpMethod": "GET",
-        "path": "/visits"
+        "path": "/visits",
+        "requestContext": {
+            "identity": {
+                "sourceIp": "123.123.123.123"
+            }
+        }
     }
 
 def test_visitor_count_put_function(apigw_event_put, dynamo_table):
