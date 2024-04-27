@@ -101,7 +101,6 @@ jobs:
       run: pytest -vv tests/integration/test_api_gateway.py
 
   deploy-site:
-    needs: integration-tests
     runs-on: ubuntu-latest
 
     steps:

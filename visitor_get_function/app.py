@@ -6,6 +6,13 @@ import json
 dynamodb = boto3.resource('dynamodb')
 
 def lambda_handler(event, context):
+
+    # Capture log event information for monitoring and analysis
+    source_ip = event['requestContext']['identity']['sourceIp']
+    user_agent = event.get('headers', {}).get('User-Agent', 'Unknown User-Agent')
+    # Print these details to CloudWatch Logs
+    print(f"Source IP: {source_ip}, User-Agent: {user_agent}")
+
     # Specify the DynamoDB table
     table = dynamodb.Table('kordis-cloud')
 
