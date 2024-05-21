@@ -172,6 +172,23 @@
               "S3",
               "Auth0"
           ]
+        },
+        {
+          "image": "images/projects/myreads.gif",
+          "title": "My Reads",
+          "bodyText": "- Categorizing books into shelves. \n- Provides search functionality. \n- Interacts with a backend API server and client library.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/myreads"
+              }
+          ],
+          "tags": [
+              "JavaScript",
+              "React",
+              "Redux",
+              "Frontend"
+          ]
         }
       ]
 }
