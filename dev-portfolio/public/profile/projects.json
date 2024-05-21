@@ -24,11 +24,11 @@
               "CloudFront",
               "Route 53"
             ]
-        },  
+        },
         {
             "image": "images/projects/coming-soon.png",
             "title": "Coming Soon Page",
-            "bodyText": "- Customized a Next.js-based 'Coming Soon' page to enhance user engagement.\n - Utilized AWS Lambda and API Gateway to handle backend processes efficiently.\n - Integrated AWS S3 and DynamoDB for scalable storage and database solutions.", 
+            "bodyText": "- Customized a Next.js-based 'Coming Soon' page to enhance user engagement.\n - Utilized AWS Lambda and API Gateway to handle backend processes efficiently.\n - Integrated AWS S3 and DynamoDB for scalable storage and database solutions.",
             "links": [
               {
                 "text": "GitHub",
@@ -53,7 +53,7 @@
         {
             "image": "images/projects/plants-vs-animals.png",
             "title": "Plants vs Animals",
-            "bodyText": "- A tower defence game developed using Unity3D, focusing on engaging gameplay with strategic elements.\n - Deployed and managed the game on Google Play, optimizing for various devices.\n - Implemented Unity Monetization to optimize in-game advertising.", 
+            "bodyText": "- A tower defence game developed using Unity3D, focusing on engaging gameplay with strategic elements.\n - Deployed and managed the game on Google Play, optimizing for various devices.\n - Implemented Unity Monetization to optimize in-game advertising.",
             "links": [
               {
                 "text": "GitHub",
@@ -70,6 +70,25 @@
               "Google Play",
               "Unity Monetization"
             ]
-        }         
+        },
+        {
+          "image": "images/projects/projects-api.png",
+          "title": "Projects API",
+          "bodyText": "- Dynamically manage and display a portfolio of software projects.\n - Uses Django and DRF for the backend API.\n - Dockerized application with Postgres integration.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/kordis.cloud"
+              }
+          ],
+          "tags": [
+              "Python",
+              "Django",
+              "DRF",
+              "Docker",
+              "Postgres",
+              "TDD"
+          ]
+        }
     ]
 }
