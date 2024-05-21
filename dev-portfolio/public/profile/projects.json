@@ -152,6 +152,26 @@
               "gRPC",
               "Kafka"
           ]
+        },
+        {
+          "image": "images/projects/serverless-quiz-api.png",
+          "title": "Serverless Quiz API",
+          "bodyText": "- Built with Node.js and AWS Lambda.\n- Utilizes the Serverless framework.\n- Implements CRUD operations for quiz items.\n- Uses DynamoDB for data storage and S3 for file attachments.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/serverless-quiz-api"
+              }
+          ],
+          "tags": [
+              "Node.js",
+              "AWS Lambda",
+              "Serverless Framework",
+              "API Gateway",
+              "DynamoDB",
+              "S3",
+              "Auth0"
+          ]
         }
-    ]
+      ]
 }
