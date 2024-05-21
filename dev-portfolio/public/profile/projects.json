@@ -110,6 +110,26 @@
               "Prometheus",
               "Jaeger"
           ]
+        },
+        {
+          "image": "images/projects/techtrends-project.png",
+          "title": "TechTrends Project",
+          "bodyText": "- Online news sharing platform for cloud-native ecosystem.\n- Built with Python Flask and SQLite.\n- Dockerized application.\n- Deployed on Kubernetes using Helm and ArgoCD.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/techtrends-project"
+              }
+          ],
+          "tags": [
+              "Python",
+              "Flask",
+              "Docker",
+              "Kubernetes",
+              "Vagrant",
+              "Helm",
+              "ArgoCD"
+          ]
         }
     ]
 }
