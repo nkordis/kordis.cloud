@@ -11,6 +11,7 @@ import FallbackSpinner from './FallbackSpinner';
 const styles = {
   containerStyle: {
     marginBottom: 25,
+    paddingBottom: 50,
   },
   showMoreStyle: {
     margin: 25,
