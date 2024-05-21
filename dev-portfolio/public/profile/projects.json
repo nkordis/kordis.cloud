@@ -130,6 +130,28 @@
               "Helm",
               "ArgoCD"
           ]
+        },
+        {
+          "image": "images/projects/udaconnect.png",
+          "title": "UdaConnect Project",
+          "bodyText": "- Built with Flask and SQLAlchemy.\n- Uses PostgreSQL for data storage.\n- Microservices architecture with gRPC and Kafka.\n- Deployed on a Kubernetes cluster using Vagrant and VirtualBox.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/UdaConnect/"
+              }
+          ],
+          "tags": [
+              "Python",
+              "Flask",
+              "Docker",
+              "Kubernetes",
+              "Vagrant",
+              "SQLAlchemy",
+              "VirtualBox",
+              "gRPC",
+              "Kafka"
+          ]
         }
     ]
 }
