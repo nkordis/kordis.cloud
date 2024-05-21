@@ -78,7 +78,7 @@
           "links": [
               {
                   "text": "GitHub",
-                  "href": "https://github.com/nkordis/kordis.cloud"
+                  "href": "https://github.com/nkordis/projects-api"
               }
           ],
           "tags": [
@@ -88,6 +88,27 @@
               "Docker",
               "Postgres",
               "TDD"
+          ]
+        },
+        {
+          "image": "images/projects/metrics-dashboard.png",
+          "title": "Building a metrics dashboard",
+          "bodyText": "- Setup and verified monitoring installation in Kubernetes cluster.\n - Integrated Grafana for real-time visualizations and dashboards.\n - Implemented Prometheus and Jaeger for monitoring and tracing application performance.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/building-a-metrics-dashboard"
+              }
+          ],
+          "tags": [
+              "Python",
+              "Flask",
+              "Docker",
+              "Kubernetes",
+              "Vagrant",
+              "Grafana",
+              "Prometheus",
+              "Jaeger"
           ]
         }
     ]
