@@ -26,29 +26,29 @@
             ]
         },
         {
-            "image": "images/projects/coming-soon.png",
-            "title": "Coming Soon Page",
-            "bodyText": "- Customized a Next.js-based 'Coming Soon' page to enhance user engagement.\n - Utilized AWS Lambda and API Gateway to handle backend processes efficiently.\n - Integrated AWS S3 and DynamoDB for scalable storage and database solutions.",
-            "links": [
+          "image": "images/projects/projects-api.png",
+          "title": "Projects API",
+          "bodyText": "- Dynamically manage and display a portfolio of software projects.\n - Uses Django and DRF for the backend API.\n - Dockerized application with Postgres integration.\n - Utilizes GitHub Actions for automated testing, linting, and Docker image builds.",
+          "links": [
               {
-                "text": "GitHub",
-                "href": "https://github.com/nkordis/coming-soon"
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/projects-api"
               },
               {
                 "text": "Live",
-                "href": "https://soon.kordis.cloud"
+                "href": "http://ec2-18-213-1-69.compute-1.amazonaws.com/api/docs/"
               }
-            ],
-            "tags": [
+          ],
+          "tags": [
               "Python",
-              "Nextjs",
-              "S3",
-              "DynamoDB",
-              "API Gateway",
-              "Lambda",
-              "CloudFront",
-              "Route 53"
-            ]
+              "Django",
+              "DRF",
+              "Docker",
+              "Postgres",
+              "AWS",
+              "EC2",
+              "TDD"
+          ]
         },
         {
             "image": "images/projects/plants-vs-animals.png",
@@ -74,22 +74,28 @@
             ]
         },
         {
-          "image": "images/projects/projects-api.png",
-          "title": "Projects API",
-          "bodyText": "- Dynamically manage and display a portfolio of software projects.\n - Uses Django and DRF for the backend API.\n - Dockerized application with Postgres integration.\n - Utilizes GitHub Actions for automated testing, linting, and Docker image builds.",
+          "image": "images/projects/coming-soon.png",
+          "title": "Coming Soon Page",
+          "bodyText": "- Customized a Next.js-based 'Coming Soon' page to enhance user engagement.\n - Utilized AWS Lambda and API Gateway to handle backend processes efficiently.\n - Integrated AWS S3 and DynamoDB for scalable storage and database solutions.",
           "links": [
-              {
-                  "text": "GitHub",
-                  "href": "https://github.com/nkordis/projects-api"
-              }
+            {
+              "text": "GitHub",
+              "href": "https://github.com/nkordis/coming-soon"
+            },
+            {
+              "text": "Live",
+              "href": "https://soon.kordis.cloud"
+            }
           ],
           "tags": [
-              "Python",
-              "Django",
-              "DRF",
-              "Docker",
-              "Postgres",
-              "TDD"
+            "Python",
+            "Nextjs",
+            "S3",
+            "DynamoDB",
+            "API Gateway",
+            "Lambda",
+            "CloudFront",
+            "Route 53"
           ]
         },
         {
