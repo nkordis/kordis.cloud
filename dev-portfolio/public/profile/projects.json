@@ -26,28 +26,29 @@
             ]
         },
         {
-          "image": "images/projects/projects-api.png",
-          "title": "Projects API",
-          "bodyText": "- Dynamically manage and display a portfolio of software projects.\n - Uses Django and DRF for the backend API.\n - Dockerized application with Postgres integration.\n - Utilizes GitHub Actions for automated testing, linting, and Docker image builds.",
+          "image": "images/projects/accommodations-api.png",
+          "title": "Accommodations API",
+          "bodyText": "- API to manage and display accommodations listings.\n - Built with ASP.NET and deployed on Azure.\n - Uses Azure SQL Database for data storage.\n - Implements Domain-Driven Design (DDD) principles.",
           "links": [
-              {
-                  "text": "GitHub",
-                  "href": "https://github.com/nkordis/projects-api"
-              },
-              {
-                "text": "Live",
-                "href": "http://ec2-18-213-1-69.compute-1.amazonaws.com/api/docs/"
-              }
+            {
+              "text": "GitHub",
+              "href": "https://github.com/nkordis/accommodations-api"
+            },
+            {
+              "text": "Live",
+              "href": "https://accommodations-api.azurewebsites.net/api/swagger"
+            }
           ],
           "tags": [
-              "Python",
-              "Django",
-              "DRF",
-              "Docker",
-              "Postgres",
-              "AWS",
-              "EC2",
-              "TDD"
+            "C#",
+            "ASP.NET",
+            "Azure",
+            "App Service",
+            "SQL DB",
+            "Identiy",
+            "Entity Framework",
+            "DDD",
+            "SQRS"
           ]
         },
         {
@@ -72,6 +73,31 @@
               "Unity Analytics",
               "Game Development"
             ]
+        },
+        {
+          "image": "images/projects/projects-api.png",
+          "title": "Projects API",
+          "bodyText": "- Dynamically manage and display a portfolio of software projects.\n - Uses Django and DRF for the backend API.\n - Dockerized application with Postgres integration.\n - Utilizes GitHub Actions for automated testing, linting, and Docker image builds.",
+          "links": [
+              {
+                  "text": "GitHub",
+                  "href": "https://github.com/nkordis/projects-api"
+              },
+              {
+                "text": "Live",
+                "href": "http://ec2-18-213-1-69.compute-1.amazonaws.com/api/docs/"
+              }
+          ],
+          "tags": [
+              "Python",
+              "Django",
+              "DRF",
+              "Docker",
+              "Postgres",
+              "AWS",
+              "EC2",
+              "TDD"
+          ]
         },
         {
           "image": "images/projects/coming-soon.png",
@@ -122,7 +148,7 @@
         {
           "image": "images/projects/techtrends-project.png",
           "title": "TechTrends Project",
-          "bodyText": "- Online news sharing platform for cloud-native ecosystem.\n- Built with Python Flask and SQLite.\n- Dockerized application.\n- Deployed on Kubernetes using Helm and ArgoCD.",
+          "bodyText": "- Online news sharing platform for cloud-native ecosystem.\n- Built with Python Flask and SQLite.\n - Deployed on Kubernetes using Helm and ArgoCD.",
           "links": [
               {
                   "text": "GitHub",
