@@ -5,7 +5,7 @@ on:
     branches:
       - dev
 
-permissions: 
+permissions:
   contents: write  # Grant write permissions to modify repository contents
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -42,13 +42,13 @@ jobs:
         pip install awscli boto3
         pip install -r tests/requirements.txt
         pip install aws-sam-cli
-        
+
     - name: Run tests
       run: pytest -v tests/unit/test_handler.py
 
     - name: Validate CloudFormation template
       run: sam  validate
-  
+
   build-deploy-infra:
     needs: test-infra
     runs-on: ubuntu-latest
@@ -69,7 +69,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Build infrastructure  
+    - name: Build infrastructure
       run: sam build
 
     - name: Deploy infrastructure
@@ -108,7 +108,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
       - name: Install Dependencies
         run: npm install --prefix ./dev-portfolio --legacy-peer-deps
       - name: Build the website files
