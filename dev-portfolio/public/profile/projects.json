@@ -52,6 +52,31 @@
           ]
         },
         {
+          "image": "images/projects/eshop.png",
+          "title": "EShop - Online Clothing Store",
+          "bodyText": "- E-commerce web application.\n - Built with ASP.NET Core and Razor Pages.\n - Uses Azure SQL Database for data storage, Stripe for payment processing.\n - Implements Repository Pattern, Authentication & Authorization, and role-based access control.",
+          "links": [
+            {
+              "text": "GitHub",
+              "href": "https://github.com/nkordis/eshop-dotnet"
+            },
+            {
+              "text": "Live",
+              "href": "https://eshop-dotnet-hwg4hacyc7bcaga6.northeurope-01.azurewebsites.net/"
+            }
+          ],
+          "tags": [
+            "C#",
+            "ASP.NET Core",
+            "Azure",
+            "App Service",
+            "SQL DB",
+            "Stripe",
+            "Entity Framework",
+            "Razor Pages"
+          ]
+        },
+        {
             "image": "images/projects/plants-vs-animals.png",
             "title": "Plants vs Animals",
             "bodyText": "- A tower defence game developed using Unity3D, focusing on gameplay with strategic elements.\n - Deployed and managed the game on Google Play, optimizing for various devices.\n - Implemented Unity Monetization to optimize in-game advertising.",
