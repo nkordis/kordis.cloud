@@ -159,7 +159,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
 
   auto-merge-to-main:
-    needs: [integration-tests, e2e-tests]
+    needs: [integration-tests, deploy-site]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev' # Ensures this job only runs on the dev branch
     steps:
