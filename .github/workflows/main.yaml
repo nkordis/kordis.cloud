@@ -146,21 +146,11 @@ jobs:
       - name: Install Chrome and ChromeDriver
         run: |
           sudo apt-get update
-
-          # Download and install Chrome
-          CHROME_VERSION="126.0.6478.126"
-          wget -q https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chrome-linux64.zip
-          sudo unzip -q chrome-linux64.zip -d /opt/chrome/
-          sudo ln -sf /opt/chrome/chrome /usr/bin/google-chrome
-          rm chrome-linux64.zip
-
-          # Download and install ChromeDriver
-          wget -q https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}/linux64/chromedriver-linux64.zip
-          sudo unzip -q chromedriver-linux64.zip -d /tmp/
-          sudo mv /tmp/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
-          sudo chmod +x /usr/local/bin/chromedriver
-          sudo rm -r /tmp/chromedriver-linux64/
-          rm chromedriver-linux64.zip
+          sudo apt-get install -y google-chrome-stable
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip"
+          sudo unzip -q chromedriver_linux64.zip -d /usr/local/bin/
+          rm chromedriver_linux64.zip
 
       - name: Run E2E Tests
         run: pytest tests/e2e/
