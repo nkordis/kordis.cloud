@@ -127,6 +127,7 @@ jobs:
         run: aws s3 sync ./dev-portfolio/build s3://kordis-cloud --delete
 
   e2e-tests:
+    if: ${{ vars.SKIP_E2E_TESTS == 'false' || success() }}
     needs: deploy-site
     runs-on: ubuntu-latest
     steps:
@@ -147,7 +148,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-          wget -q "https://chromedriver.storage.googleapis.com/128.0.6613.113/chromedriver_linux64.zip"
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip"
           sudo unzip -q chromedriver_linux64.zip -d /usr/local/bin/
           rm chromedriver_linux64.zip
 
