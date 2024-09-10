@@ -127,7 +127,7 @@ jobs:
         run: aws s3 sync ./dev-portfolio/build s3://kordis-cloud --delete
 
   e2e-tests:
-    if: ${{ vars.SKIP_E2E_TESTS == 'false' || success() }}
+    if: ${{ vars.SKIP_E2E_TESTS == 'false' }}
     needs: deploy-site
     runs-on: ubuntu-latest
     steps:
