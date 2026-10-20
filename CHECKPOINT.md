@@ -12,5 +12,6 @@ Last updated: 2026-10-20
 4. Kordis company section: design only, not published.
 
 ## Notes
+- Deploys: the workflow now runs on every push to `main` (plus manual runs). It always syncs the site to S3 and runs `sam deploy` only when infra files change. The `dev` branch and the dev-to-main auto-merge are no longer used.
 - dev-portfolio/README.md and LICENSE.md are upstream template files and still mention the template author; left untouched in P0.
 - Local build needs `npm install --legacy-peer-deps` plus `ajv@8` (not saved) in this environment.

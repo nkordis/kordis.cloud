@@ -86,7 +86,7 @@ python -m pytest tests/e2e -v
 
 ## Continuous Integration and Deployment (CI/CD)
 
-The CI/CD pipeline is managed through GitHub Actions, automating the testing, building, and deployment phases to ensure a seamless workflow and high availability of the application. The process is triggered by pushes to the `dev` branch, following this sequence:
+The CI/CD pipeline is managed through GitHub Actions, automating the testing, building, and deployment phases to ensure a seamless workflow and high availability of the application. The process is triggered by pushes to the `main` branch (every merged pull request), or manually from the Actions tab. The infrastructure jobs run only when infrastructure files change (`template.yaml`, `samconfig.toml`, the Lambda function folders, their tests or the workflow itself); the site is built and synced on every run. The sequence is:
 
 -  **Test Infrastructure:** Validates and tests new code commits using unit and tests.
 
