@@ -50,7 +50,7 @@ Keep it to one screen of text plus a small facts block.
    - Registered name and CVR number `TODO(Nikos)`
    - Founded `TODO(Nikos)`
    - Location: Copenhagen, Denmark
-7. **Contact:** reuse links that already exist on the site (existing social links and the contact route already used by the portfolio). `TODO(Nikos): decide whether a company email is wanted. This design adds none.`
+7. **Contact:** reuse only links that already exist on the site (the existing social links). `TODO(Nikos): decide whether a company email is wanted. This design adds none.`
 
 Writing rules: no metrics, customers, funding, team size or dates unless supplied; no superlatives.
 
