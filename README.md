@@ -11,7 +11,7 @@ Visit the live site at [https://kordis.cloud](https://kordis.cloud).
 
 ## Components Overview
 
- -  **Backend:** Serverless Lambda functions, written in Python 3.9, manage functionalities such as visitor tracking. The code for these functions can be found in the `visitor_get_function` and `visitor_put_function` directories.
+ -  **Backend:** Serverless Lambda functions, written in Python 3.13, manage functionalities such as visitor tracking. The code for these functions can be found in the `visitor_get_function` and `visitor_put_function` directories.
 
 -  **Database:** Amazon DynamoDB is used to store essential data like visitor counts, providing fast and scalable performance.
 
@@ -35,7 +35,7 @@ The AWS Serverless Application Model (SAM) CLI is an extension of the AWS CLI th
 
 -  **SAM CLI** - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 
--  **Python 3.9** - [Install Python](https://www.python.org/downloads/)
+-  **Python 3.13** - [Install Python](https://www.python.org/downloads/)
 
 -  **Docker** - [Install Docker Community Edition](https://hub.docker.com/search/?type=edition&offering=community)
 
