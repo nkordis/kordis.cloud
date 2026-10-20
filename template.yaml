@@ -156,7 +156,7 @@ Resources:
     Properties:
       CodeUri: visitor_get_function/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.13
       Tracing: Active
       Timeout: 10
       Architectures:
@@ -178,7 +178,7 @@ Resources:
     Properties:
       CodeUri: visitor_put_function/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.13
       Tracing: Active
       Architectures:
         - x86_64
