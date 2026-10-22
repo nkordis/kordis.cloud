@@ -22,10 +22,18 @@ const Footer = () => {
   useEffect(() => {
     const fetchAndUpdateVisitorCount = async () => {
       try {
-        // Update visitor count first
-        await fetch(API_URL, { method: 'PUT' });
-        // Then fetch the updated count
-        const response = await fetch(API_URL);
+        // The PUT response already carries the updated count
+        let response = null;
+        try {
+          response = await fetch(API_URL, { method: 'PUT' });
+        } catch (error) {
+          // Throttled requests come back without CORS headers, so fetch rejects
+          response = null;
+        }
+        if (!response || !response.ok) {
+          // Still show the current count
+          response = await fetch(API_URL);
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch visitor count');
         }
