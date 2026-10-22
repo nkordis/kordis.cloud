@@ -239,21 +239,19 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
-              Action:
-                - dynamodb:GetItem
-                - dynamodb:UpdateItem
+              Action: dynamodb:GetItem
               Resource: !GetAtt DynamoDBTable.Arn
               Condition:
                 ForAllValues:StringEquals:
                   dynamodb:LeadingKeys:
                     - visits
+            # Written inside TransactWriteItems, where AWS does not document
+            # per-item LeadingKeys checks, so these are scoped to the table only
             - Effect: Allow
-              Action: dynamodb:PutItem
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
               Resource: !GetAtt DynamoDBTable.Arn
-              Condition:
-                ForAllValues:StringLike:
-                  dynamodb:LeadingKeys:
-                    - "visitor#*"
 
   VisitorCountPutLogGroup:
     Type: AWS::Logs::LogGroup

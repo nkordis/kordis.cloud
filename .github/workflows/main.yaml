@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+# One deploy at a time: a second sam deploy fails while the stack is updating
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
 jobs:
   # Decide whether the AWS stack needs a deploy: only when infra files changed
   changes:
