@@ -150,8 +150,16 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+      # Hashed build assets first (cached for a year, never change), then
+      # everything else with a short cache so HTML and profile JSON update within 5 minutes.
+      # Old hashed assets are kept so pages still cached at the edge can load them.
       - name: Sync Website files to S3 Bucket
-        run: aws s3 sync ./dev-portfolio/build s3://kordis-cloud --delete
+        run: |
+          aws s3 sync ./dev-portfolio/build/static s3://kordis-cloud/static \
+            --cache-control "public, max-age=31536000, immutable"
+          aws s3 sync ./dev-portfolio/build s3://kordis-cloud --delete \
+            --exclude "static/*" \
+            --cache-control "public, max-age=300"
 
   e2e-tests:
     if: ${{ vars.SKIP_E2E_TESTS == 'false' }}
