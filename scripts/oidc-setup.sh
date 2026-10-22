@@ -68,4 +68,10 @@ create_role() { # name trust-file policy-file
 }
 create_role gha-kordis-cloud-site trust-github-main.json site.json
 create_role cfn-exec-kordis-cloud trust-cloudformation.json cfn-exec.json
+# With a service role, CloudFormation expands the SAM transform as that role
+cat > cfn-exec-transform.json <<EOF
+{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"cloudformation:CreateChangeSet",
+ "Resource":"arn:aws:cloudformation:${REGION}:aws:transform/Serverless-2016-10-31"}]}
+EOF
+aws iam put-role-policy --role-name cfn-exec-kordis-cloud --policy-name cfn-exec-kordis-cloud-sam-transform --policy-document file://cfn-exec-transform.json
 create_role gha-kordis-cloud-infra trust-github-main.json infra.json
