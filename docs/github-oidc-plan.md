@@ -79,6 +79,7 @@ Permissions: what the stack creates, limited to its resources where AWS supports
 - `apigateway:*` on `arn:aws:apigateway:us-east-1::/*` (API Gateway has no useful per-API scoping at create time)
 - `cloudfront:*` on `*` and `acm:DescribeCertificate`, `acm:RequestCertificate`, `acm:DeleteCertificate`, `acm:AddTagsToCertificate` on `*` (CloudFront and ACM ids are not known in advance)
 - `route53:GetHostedZone`, `ChangeResourceRecordSets`, `ListResourceRecordSets`, `GetChange` on `arn:aws:route53:::hostedzone/Z05030141Q82CAW2GKME0` and `arn:aws:route53:::change/*`
+- `cloudformation:CreateChangeSet` on `arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31` (with a service role, CloudFormation expands the SAM transform as that role; found on the first OIDC deploy)
 - `xray:*` is not needed (the functions' own roles get X-Ray write access)
 
 These were written from the template, not tested against the account. Step 7 tests them with a real change before anything depends on them.
