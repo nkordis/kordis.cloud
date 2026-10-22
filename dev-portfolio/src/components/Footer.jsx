@@ -22,10 +22,12 @@ const Footer = () => {
   useEffect(() => {
     const fetchAndUpdateVisitorCount = async () => {
       try {
-        // Update visitor count first
-        await fetch(API_URL, { method: 'PUT' });
-        // Then fetch the updated count
-        const response = await fetch(API_URL);
+        // The PUT response already carries the updated count
+        let response = await fetch(API_URL, { method: 'PUT' });
+        if (!response.ok) {
+          // e.g. throttled: still show the current count
+          response = await fetch(API_URL);
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch visitor count');
         }
