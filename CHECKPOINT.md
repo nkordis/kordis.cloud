@@ -6,7 +6,7 @@ Last updated: 2026-10-22
 - P0 (this PR): removed template placeholder sections (About, Education, Experience: data files, components, routes, nav links), fixed manifest.json and HTML title/description, headline changed from "Cloud Developer" to "Applied AI Developer".
 
 ## External cost and security review (2026-10-22)
-- Findings 8 and 10 (this PR): the footer counter uses the PUT response (falls back to GET only if PUT fails), and `npm run build` now fails (postbuild check) if any `build/profile/*.json` contains "TODO", because those files are published as-is even when React hides an entry. PR #7 removes the existing TODO entries. Switching the REST API to an HTTP API (optional part of finding 8) was not done.
+- Findings 8 and 10 (this PR): the footer counter uses the PUT response (falls back to GET only if PUT fails), and `npm run build` now fails (postbuild check) if any `build/profile/*.json` contains "TODO", because those files are published as-is even when React hides an entry. Neither main nor PR #7 has TODO entries now; the check keeps it that way. Switching the REST API to an HTTP API (optional part of finding 8) was not done.
 - Still open in their own PRs: findings 1 and 7 (S3/CloudFront), 2, 3, 6, 9 (API and Lambda), 4 (GitHub OIDC). Finding 5 is handled in PR #7.
 
 ## Remaining queue

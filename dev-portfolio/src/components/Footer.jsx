@@ -23,9 +23,15 @@ const Footer = () => {
     const fetchAndUpdateVisitorCount = async () => {
       try {
         // The PUT response already carries the updated count
-        let response = await fetch(API_URL, { method: 'PUT' });
-        if (!response.ok) {
-          // e.g. throttled: still show the current count
+        let response = null;
+        try {
+          response = await fetch(API_URL, { method: 'PUT' });
+        } catch (error) {
+          // Throttled requests come back without CORS headers, so fetch rejects
+          response = null;
+        }
+        if (!response || !response.ok) {
+          // Still show the current count
           response = await fetch(API_URL);
         }
         if (!response.ok) {
