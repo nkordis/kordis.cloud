@@ -19,7 +19,7 @@ ALLOWED_ORIGINS = {
     if origin.strip()
 }
 # A visitor (same IP and User-Agent) is counted at most once per UTC day.
-# The marker item expires through DynamoDB TTL, so only a hash is kept, for about a day.
+# The marker item expires through DynamoDB TTL, so the hash is kept for at most two days.
 DEDUP_TTL_SECONDS = 2 * 24 * 60 * 60
 
 # Initialize a DynamoDB client
@@ -44,12 +44,20 @@ def cors_headers(event):
 
 
 def visitor_key(event):
-    """Daily, non-reversible visitor id: the raw IP and User-Agent are never stored or logged."""
+    """Daily visitor id (SHA-256 of day, IP and User-Agent); the raw values are never stored or logged."""
     source_ip = event.get('requestContext', {}).get('identity', {}).get('sourceIp', '')
     user_agent = get_header(event, 'User-Agent') or ''
     day = datetime.now(timezone.utc).strftime('%Y-%m-%d')
     digest = hashlib.sha256(f"{day}|{source_ip}|{user_agent}".encode()).hexdigest()
     return f"visitor#{digest}"
+
+
+def is_duplicate_visit(error):
+    """True only when the transaction was cancelled by the visitor marker's condition."""
+    if error.response['Error']['Code'] != 'TransactionCanceledException':
+        return False
+    reasons = error.response.get('CancellationReasons') or []
+    return bool(reasons) and reasons[0].get('Code') == 'ConditionalCheckFailed'
 
 
 def response(status_code, headers, body):
@@ -95,14 +103,14 @@ def lambda_handler(event, context):
             )
         counted = True
     except ClientError as e:
-        if e.response['Error']['Code'] != 'TransactionCanceledException':
+        if not is_duplicate_visit(e):
             print(f"An error occurred: {e.response['Error']['Code']}")
             return response(500, headers, {"message": "AWS service error"})
         counted = False
 
     try:
         with xray_recorder.capture('get_item'):
-            item = table.get_item(Key={'id': 'visits'}).get('Item', {})
+            item = table.get_item(Key={'id': 'visits'}, ConsistentRead=True).get('Item', {})
     except ClientError as e:
         print(f"An error occurred: {e.response['Error']['Code']}")
         return response(500, headers, {"message": "AWS service error"})

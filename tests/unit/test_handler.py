@@ -171,3 +171,19 @@ def test_preflight_does_not_count(apigw_event_put, dynamo_table):
     assert response["statusCode"] == 204
     assert "PUT" in response["headers"]["Access-Control-Allow-Methods"]
     assert dynamo_table.get_item(Key={'id': 'visits'})['Item']['visitsCount'] == 10
+
+
+def test_transaction_errors_other_than_duplicate_are_not_hidden(apigw_event_put, dynamo_table, monkeypatch):
+    """A conflict or throttle cancelling the transaction is a 500, not a silently dropped visit."""
+    from botocore.exceptions import ClientError
+
+    def cancelled(**kwargs):
+        raise ClientError({
+            'Error': {'Code': 'TransactionCanceledException', 'Message': 'cancelled'},
+            'CancellationReasons': [{'Code': 'TransactionConflict'}, {'Code': 'None'}],
+        }, 'TransactWriteItems')
+
+    monkeypatch.setattr(put_function.dynamodb.meta.client, 'transact_write_items', cancelled)
+    response = put_function.lambda_handler(apigw_event_put, {})
+
+    assert response["statusCode"] == 500
