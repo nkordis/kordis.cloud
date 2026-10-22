@@ -50,7 +50,7 @@ function Skills(props) {
                 <div key={rows.title}>
                   <br />
                   <h3>{rows.title}</h3>
-                  {rows.items.map((item) => (
+                  {rows.items.filter((i) => !i.hidden).map((item) => (
                     <div key={item.title} style={{ display: 'inline-block' }}>
                       <img
                         style={styles.iconStyle}

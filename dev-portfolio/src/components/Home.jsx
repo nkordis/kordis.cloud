@@ -9,6 +9,11 @@ const styles = {
   nameStyle: {
     fontSize: '5em',
   },
+  bioStyle: {
+    maxWidth: 640,
+    textAlign: 'center',
+    marginTop: 16,
+  },
   inlineChild: {
     display: 'inline-block',
   },
@@ -47,6 +52,7 @@ function Home() {
             }}
           />
         </div>
+        {data?.bio && <p style={styles.bioStyle}>{data.bio}</p>}
         <Social />
       </div>
     </Fade>
