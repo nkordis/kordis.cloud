@@ -28,7 +28,7 @@ jobs:
       run: |
         if [ "${{ github.event_name }}" != "push" ] || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
           echo "infra=true" >> "$GITHUB_OUTPUT"
-        elif git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -qE '^(template\.yaml|samconfig\.toml|visitor_get_function/|visitor_put_function/|tests/(unit|integration)/|\.github/workflows/)'; then
+        elif git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -qE '^(template\.yaml|samconfig\.toml|visitor_get_function/|visitor_put_function/|scripts/|tests/(unit|integration)/|\.github/workflows/)'; then
           echo "infra=true" >> "$GITHUB_OUTPUT"
         else
           echo "infra=false" >> "$GITHUB_OUTPUT"
@@ -71,7 +71,7 @@ jobs:
         pip install aws-sam-cli
 
     - name: Run tests
-      run: pytest -v tests/unit/test_handler.py
+      run: pytest -v tests/unit
 
     - name: Validate CloudFormation template
       run: sam  validate
@@ -126,6 +126,30 @@ jobs:
       run: echo "AWS_SAM_STACK_NAME=kordis-cloud" >> $GITHUB_ENV
     - name: Run Integration Tests
       run: pytest -vv tests/integration/test_api_gateway.py
+
+  # Delete SAM packages the stack no longer uses (older than 30 days) and expire
+  # their old versions. Best effort: a failure here never blocks a deploy.
+  cleanup-sam-artifacts:
+    needs: integration-tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Clean up old SAM artifacts
+      run: |
+        pip install boto3
+        python scripts/cleanup_sam_artifacts.py --stack kordis-cloud --prefix kordis-cloud
 
   deploy-site:
     runs-on: ubuntu-latest
