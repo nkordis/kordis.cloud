@@ -5,7 +5,7 @@ import pytest
 import requests
 
 """
-Make sure env variable AWS_SAM_STACK_NAME exists with the name of the stack we are going to test. 
+Set KORDIS_API_URL to the API base URL (CI does), or AWS_SAM_STACK_NAME to read it from the stack outputs.
 """
 
 
@@ -13,7 +13,11 @@ class TestApiGateway:
 
     @pytest.fixture()
     def api_gateway_url(self):
-        """ Get the API Gateway URL from Cloudformation Stack outputs """
+        """ Use KORDIS_API_URL if set, otherwise read the URL from the Cloudformation Stack outputs """
+        api_url = os.environ.get("KORDIS_API_URL")
+        if api_url:
+            return api_url if api_url.endswith("/") else api_url + "/"
+
         stack_name = os.environ.get("AWS_SAM_STACK_NAME")
 
         if stack_name is None:
