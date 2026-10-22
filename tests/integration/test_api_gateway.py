@@ -47,14 +47,25 @@ class TestApiGateway:
         assert isinstance(response_data['visitsCount'], int)
 
     def test_put_visits_api_gateway(self, api_gateway_url):
-        """ Call the API Gateway endpoint with a PUT request and check the response """
-        respone_get = requests.put(api_gateway_url + "visits")
-        response = requests.put(api_gateway_url + "visits")
+        """ Call PUT twice: the count is returned, and the same visitor is counted at most once a day """
+        first = requests.put(api_gateway_url + "visits")
+        second = requests.put(api_gateway_url + "visits")
 
-        response_data = response.json()
-        response_get_data = respone_get.json()
+        first_data = first.json()
+        second_data = second.json()
 
-        assert response.status_code == 200
-        assert response_data['message'] == 'Updated visit count' 
-        assert isinstance(response_data['visitsCount'], int)
-        assert response_data['visitsCount'] >= response_get_data['visitsCount'] + 1
+        assert first.status_code == 200
+        assert second.status_code == 200
+        assert isinstance(first_data['visitsCount'], int)
+        assert isinstance(second_data['visitsCount'], int)
+        assert second_data['counted'] is False
+        assert second_data['message'] == 'Visit already counted today'
+        assert second_data['visitsCount'] >= first_data['visitsCount']
+
+    def test_cors_rejects_other_origins(self, api_gateway_url):
+        """ Only the portfolio origins get a CORS header """
+        allowed = requests.options(api_gateway_url + "visits", headers={"Origin": "https://kordis.cloud"})
+        denied = requests.options(api_gateway_url + "visits", headers={"Origin": "https://example.com"})
+
+        assert allowed.headers.get('Access-Control-Allow-Origin') == 'https://kordis.cloud'
+        assert 'Access-Control-Allow-Origin' not in denied.headers

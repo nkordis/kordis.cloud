@@ -7,8 +7,9 @@ Last updated: 2026-10-22
 
 ## External cost and security review (2026-10-22)
 - Findings 1 and 7 (PR #10, #11, merged): site bucket made private behind CloudFront OAC; CloudFront caches with a cache policy that follows upload Cache-Control headers (hashed `static/` assets 1 year, everything else 5 minutes). All four S3 public-access blocks are on (`RestrictPublicBuckets` was turned on in a follow-up PR after the OAC deploy, to avoid an outage).
+- Findings 2, 3, 6, 9 (PR #12, merged; needed an inline `kordis-cloud-log-groups` policy on sam-user): counter API throttled (5 req/s, burst 10, stage-wide), each counter Lambda capped by reserved concurrency (`ReservedConcurrency` parameter, default 2; 0 turns it off), PUT counts a visitor (hashed IP + User-Agent) at most once per UTC day via a DynamoDB marker with TTL, CORS answers only https://kordis.cloud and https://www.kordis.cloud (preflight handled by the PUT Lambda), GET has only `GetItem` on the `visits` key and PUT only `GetItem` on `visits` plus `PutItem`/`UpdateItem` on the table (they run inside a transaction, where per-key conditions are not documented), Lambdas log to new log groups with 14-day retention and no longer log IPs or User-Agents, and a CI job deletes SAM packages the stack no longer references (older than 30 days) and adds a lifecycle rule expiring old versions after 7 days. The workflow now runs one deploy at a time (`concurrency: deploy-main`).
 - Findings 8 and 10 (this PR): the footer counter uses the PUT response (falls back to GET only if PUT fails), and `npm run build` now fails (postbuild check) if any `build/profile/*.json` contains "TODO", because those files are published as-is even when React hides an entry. Neither main nor PR #7 has TODO entries now; the check keeps it that way. Switching the REST API to an HTTP API (optional part of finding 8) was not done.
-- Still open in their own PRs: findings 2, 3, 6, 9 (API and Lambda lockdown, PR #12), 4 (GitHub OIDC). Finding 5 is handled in PR #7.
+- Still open: finding 4 (GitHub OIDC, PR #14, waits on Nikos's AWS setup). Finding 5 is handled in PR #7.
 
 ## Remaining queue
 1. Lean portfolio: short bio, 3-4 selected projects, links (confirmed facts only; TODOs for anything unconfirmed). Also review the Skills page content and the Resume link.
@@ -18,6 +19,8 @@ Last updated: 2026-10-22
 
 ## Notes
 - After the OAC change the S3 origin is no longer publicly readable, so `curl https://kordis-cloud.s3.amazonaws.com/...` returns 403. Check live content through the site, or with `aws s3 cp s3://kordis-cloud/<key> -`.
+- The old auto-created log groups `/aws/lambda/kordis-cloud-VisitorCount*` keep their history with no retention. Nikos can delete them or run `aws logs put-retention-policy --log-group-name <name> --retention-in-days 14` once.
+- If the deploy fails on reserved concurrency (accounts with a 10-execution limit cannot reserve any), set `ReservedConcurrency=0` in samconfig.toml `parameter_overrides`.
 - Deploys: the workflow now runs on every push to `main` (plus manual runs). It always syncs the site to S3 and runs `sam deploy` only when infra files change. The `dev` branch and the dev-to-main auto-merge are no longer used.
 - dev-portfolio/README.md and LICENSE.md are upstream template files and still mention the template author; left untouched in P0.
 - Local build needs `npm install --legacy-peer-deps` plus `ajv@8` (not saved) in this environment.
