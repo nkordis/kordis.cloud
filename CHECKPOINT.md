@@ -6,7 +6,7 @@ Last updated: 2026-10-22
 - P0 (this PR): removed template placeholder sections (About, Education, Experience: data files, components, routes, nav links), fixed manifest.json and HTML title/description, headline changed from "Cloud Developer" to "Applied AI Developer".
 
 ## External cost and security review (2026-10-22)
-- Findings 1 and 7 (this PR): site bucket made private behind CloudFront OAC; CloudFront caches with a cache policy that follows upload Cache-Control headers (hashed `static/` assets 1 year, everything else 5 minutes). `RestrictPublicBuckets` stays false for this deploy only, so the old public policy keeps serving while CloudFront switches over; a one-line follow-up PR turns it on.
+- Findings 1 and 7 (this PR): site bucket made private behind CloudFront OAC; CloudFront caches with a cache policy that follows upload Cache-Control headers (hashed `static/` assets 1 year, everything else 5 minutes). All four S3 public-access blocks are on (`RestrictPublicBuckets` was turned on in a follow-up PR after the OAC deploy, to avoid an outage).
 - Still open in their own PRs: findings 2, 3, 6, 9 (API and Lambda lockdown), 8 and 10 (frontend), 4 (GitHub OIDC). Finding 5 is handled in PR #7.
 
 ## Remaining queue

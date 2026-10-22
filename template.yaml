@@ -52,14 +52,12 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref S3BucketName
-      # Private bucket: only CloudFront (through the OAC below) can read objects.
-      # RestrictPublicBuckets stays false for this one deploy so the old public
-      # policy keeps serving while CloudFront switches to OAC; a follow-up PR sets it true.
+      # Private bucket: only CloudFront (through the OAC below) can read objects
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         IgnorePublicAcls: true
         BlockPublicPolicy: true
-        RestrictPublicBuckets: false
+        RestrictPublicBuckets: true
 
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
