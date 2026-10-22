@@ -6,9 +6,10 @@ Last updated: 2026-10-22
 - P0 (this PR): removed template placeholder sections (About, Education, Experience: data files, components, routes, nav links), fixed manifest.json and HTML title/description, headline changed from "Cloud Developer" to "Applied AI Developer".
 
 ## External cost and security review (2026-10-22)
+- Findings 1 and 7 (PR #10, #11, merged): site bucket made private behind CloudFront OAC; CloudFront caches with a cache policy that follows upload Cache-Control headers (hashed `static/` assets 1 year, everything else 5 minutes). All four S3 public-access blocks are on (`RestrictPublicBuckets` was turned on in a follow-up PR after the OAC deploy, to avoid an outage).
 - Findings 2, 3, 6, 9 (this PR): counter API throttled (5 req/s, burst 10, stage-wide), each counter Lambda capped by reserved concurrency (`ReservedConcurrency` parameter, default 2; 0 turns it off), PUT counts a visitor (hashed IP + User-Agent) at most once per UTC day via a DynamoDB marker with TTL, CORS answers only https://kordis.cloud and https://www.kordis.cloud (preflight handled by the PUT Lambda), GET has only `GetItem` on the `visits` key and PUT only `GetItem` on `visits` plus `PutItem`/`UpdateItem` on the table (they run inside a transaction, where per-key conditions are not documented), Lambdas log to new log groups with 14-day retention and no longer log IPs or User-Agents, and a CI job deletes SAM packages the stack no longer references (older than 30 days) and adds a lifecycle rule expiring old versions after 7 days. The workflow now runs one deploy at a time (`concurrency: deploy-main`).
 - Finding 4 (stacked PR): workflow moves to GitHub OIDC. Unit, integration and e2e tests get no AWS credentials; `deploy-site` and the infra jobs assume separate roles; `sam deploy` hands CloudFormation its own execution role. AWS-side setup is in docs/github-oidc-plan.md and must be done by Nikos before that PR merges.
-- Still open in their own PRs: findings 1 and 7 (S3/CloudFront), 8 and 10 (frontend). Finding 5 is handled in PR #7.
+- Still open in their own PRs: findings 8 and 10 (frontend, PR #13). Finding 5 is handled in PR #7.
 
 ## Remaining queue
 1. Lean portfolio: short bio, 3-4 selected projects, links (confirmed facts only; TODOs for anything unconfirmed). Also review the Skills page content and the Resume link.
@@ -17,6 +18,7 @@ Last updated: 2026-10-22
 4. Kordis company section: design only, not published.
 
 ## Notes
+- After the OAC change the S3 origin is no longer publicly readable, so `curl https://kordis-cloud.s3.amazonaws.com/...` returns 403. Check live content through the site, or with `aws s3 cp s3://kordis-cloud/<key> -`.
 - The old auto-created log groups `/aws/lambda/kordis-cloud-VisitorCount*` keep their history with no retention. Nikos can delete them or run `aws logs put-retention-policy --log-group-name <name> --retention-in-days 14` once.
 - If the deploy fails on reserved concurrency (accounts with a 10-execution limit cannot reserve any), set `ReservedConcurrency=0` in samconfig.toml `parameter_overrides`.
 - Deploys: the workflow now runs on every push to `main` (plus manual runs). It always syncs the site to S3 and runs `sam deploy` only when infra files change. The `dev` branch and the dev-to-main auto-merge are no longer used.
