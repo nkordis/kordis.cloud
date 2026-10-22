@@ -69,6 +69,7 @@ Permissions: what the stack creates, limited to its resources where AWS supports
 - `iam:GetRole`, `CreateRole`, `DeleteRole`, `TagRole`, `UntagRole`, `PutRolePolicy`, `DeleteRolePolicy`, `GetRolePolicy`, `ListRolePolicies`, `ListAttachedRolePolicies`, `DetachRolePolicy`, `UpdateAssumeRolePolicy`, `PassRole` on `arn:aws:iam::<ACCOUNT_ID>:role/kordis-cloud-*`
 - `iam:AttachRolePolicy` on the same roles, **only** with condition `ArnEquals` `iam:PolicyARN` = `arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole` or `arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess` (the two managed policies SAM attaches), so a deploy can never attach an admin policy
 - `s3:*` on `arn:aws:s3:::kordis-cloud` (bucket settings and policy, not objects)
+- `s3:GetObject` on `arn:aws:s3:::aws-sam-cli-managed-default-samclisourcebucket-*/*` (Lambda reads the code package with the caller's permissions)
 - `apigateway:*` on `arn:aws:apigateway:us-east-1::/*` (API Gateway has no useful per-API scoping at create time)
 - `cloudfront:*` on `*` and `acm:DescribeCertificate`, `acm:RequestCertificate`, `acm:DeleteCertificate`, `acm:AddTagsToCertificate` on `*` (CloudFront and ACM ids are not known in advance)
 - `route53:GetHostedZone`, `ChangeResourceRecordSets`, `ListResourceRecordSets`, `GetChange` on `arn:aws:route53:::hostedzone/Z05030141Q82CAW2GKME0` and `arn:aws:route53:::change/*`
