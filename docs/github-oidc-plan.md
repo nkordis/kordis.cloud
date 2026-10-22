@@ -21,6 +21,12 @@ The three role names deliberately do **not** start with `kordis-cloud-`. The exe
 
 ## Steps
 
+Steps 1 to 5 are automated in `scripts/oidc-setup.sh`. In AWS CloudShell run:
+```
+curl -fsSL https://raw.githubusercontent.com/nkordis/kordis.cloud/main/scripts/oidc-setup.sh -o oidc-setup.sh && bash oidc-setup.sh
+```
+(Before this PR merges, use `ci/github-oidc` instead of `main` in that URL.) The JSON below is what the script applies.
+
 ### 1. OIDC identity provider (once per account)
 IAM → Identity providers → Add provider → OpenID Connect, URL `https://token.actions.githubusercontent.com`, audience `sts.amazonaws.com`. Or:
 ```
