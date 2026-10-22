@@ -38,6 +38,10 @@ def apigw_event_put():
         "body": json.dumps({}),  # Assuming no specific body is required
         "httpMethod": "PUT",
         "path": "/visits",
+        "headers": {
+            "origin": "https://kordis.cloud",
+            "User-Agent": "pytest"
+        },
         "requestContext": {
             "identity": {
                 "sourceIp": "123.123.123.123"
@@ -98,3 +102,88 @@ def test_visitor_count_get_function(apigw_event_get, dynamo_table):
     # Optionally, you can check for the structure of the response if it's consistent
     assert 'visitsCount' in data, "Response body must include visitsCount"
 
+
+
+def test_visitor_count_put_returns_new_count(apigw_event_put, dynamo_table):
+    """The PUT response carries the updated count, so the frontend needs no extra GET."""
+    response = put_function.lambda_handler(apigw_event_put, {})
+    data = json.loads(response["body"])
+
+    assert data["visitsCount"] == 11
+    assert data["counted"] is True
+
+
+def test_visitor_count_put_deduplicates_same_visitor(apigw_event_put, dynamo_table):
+    """A second PUT from the same IP and User-Agent on the same day is not counted."""
+    put_function.lambda_handler(apigw_event_put, {})
+    response = put_function.lambda_handler(apigw_event_put, {})
+    data = json.loads(response["body"])
+
+    assert response["statusCode"] == 200
+    assert data["counted"] is False
+    assert data["visitsCount"] == 11
+    assert dynamo_table.get_item(Key={'id': 'visits'})['Item']['visitsCount'] == 11
+
+
+def test_visitor_count_put_counts_different_visitors(apigw_event_put, dynamo_table):
+    """Different visitors are each counted once."""
+    put_function.lambda_handler(apigw_event_put, {})
+    other = json.loads(json.dumps(apigw_event_put))
+    other["requestContext"]["identity"]["sourceIp"] = "10.0.0.2"
+    data = json.loads(put_function.lambda_handler(other, {})["body"])
+
+    assert data["counted"] is True
+    assert data["visitsCount"] == 12
+
+
+def test_visitor_marker_stores_only_a_hash(apigw_event_put, dynamo_table):
+    """The dedup marker expires and never contains the raw IP or User-Agent."""
+    put_function.lambda_handler(apigw_event_put, {})
+    items = dynamo_table.scan()["Items"]
+    markers = [item for item in items if item["id"].startswith("visitor#")]
+
+    assert len(markers) == 1
+    assert "expiresAt" in markers[0]
+    assert "123.123.123.123" not in json.dumps(markers[0], default=str)
+    assert "pytest" not in json.dumps(markers[0], default=str)
+
+
+def test_cors_allows_only_portfolio_origins(apigw_event_put, dynamo_table):
+    """Allowed origins are echoed back; any other origin gets no CORS header."""
+    allowed = put_function.lambda_handler(apigw_event_put, {})
+    assert allowed["headers"]["Access-Control-Allow-Origin"] == "https://kordis.cloud"
+
+    other = json.loads(json.dumps(apigw_event_put))
+    other["headers"]["origin"] = "https://evil.example"
+    denied = put_function.lambda_handler(other, {})
+    assert "Access-Control-Allow-Origin" not in denied["headers"]
+
+    get_event = {"httpMethod": "GET", "headers": {"origin": "https://www.kordis.cloud"}}
+    get_response = get_function.lambda_handler(get_event, {})
+    assert get_response["headers"]["Access-Control-Allow-Origin"] == "https://www.kordis.cloud"
+
+
+def test_preflight_does_not_count(apigw_event_put, dynamo_table):
+    """OPTIONS answers the CORS preflight without touching the counter."""
+    preflight = dict(apigw_event_put, httpMethod="OPTIONS")
+    response = put_function.lambda_handler(preflight, {})
+
+    assert response["statusCode"] == 204
+    assert "PUT" in response["headers"]["Access-Control-Allow-Methods"]
+    assert dynamo_table.get_item(Key={'id': 'visits'})['Item']['visitsCount'] == 10
+
+
+def test_transaction_errors_other_than_duplicate_are_not_hidden(apigw_event_put, dynamo_table, monkeypatch):
+    """A conflict or throttle cancelling the transaction is a 500, not a silently dropped visit."""
+    from botocore.exceptions import ClientError
+
+    def cancelled(**kwargs):
+        raise ClientError({
+            'Error': {'Code': 'TransactionCanceledException', 'Message': 'cancelled'},
+            'CancellationReasons': [{'Code': 'TransactionConflict'}, {'Code': 'None'}],
+        }, 'TransactWriteItems')
+
+    monkeypatch.setattr(put_function.dynamodb.meta.client, 'transact_write_items', cancelled)
+    response = put_function.lambda_handler(apigw_event_put, {})
+
+    assert response["statusCode"] == 500

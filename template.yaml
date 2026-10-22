@@ -26,17 +26,28 @@ Parameters:
     Default: "kordis-cloud"
     Description: The name of the S3 bucket for static content.
 
+  ReservedConcurrency:
+    Type: Number
+    Default: 2
+    MinValue: 0
+    Description: >
+      Reserved concurrency for each counter Lambda, a hard cap on parallel runs.
+      Set 0 to leave it unreserved (needed if the account concurrency limit is only 10).
+
+Conditions:
+  HasReservedConcurrency: !Not [!Equals [!Ref ReservedConcurrency, 0]]
+
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
     MemorySize: 128
-  Api:
-    Cors: 
-        AllowMethods: "'GET,PUT,OPTIONS'"
-        AllowHeaders: "'content-type'"
-        AllowOrigin: "'*'"
+    ReservedConcurrentExecutions: !If [HasReservedConcurrency, !Ref ReservedConcurrency, !Ref AWS::NoValue]
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref DynamoDBTableName
+        ALLOWED_ORIGINS: !Sub "https://${DomainName},https://www.${DomainName}"
 
 Resources:
   
@@ -70,6 +81,10 @@ Resources:
       KeySchema:
         - AttributeName: id
           KeyType: HASH
+      # Expires the daily visitor markers written by the PUT function
+      TimeToLiveSpecification:
+        AttributeName: expiresAt
+        Enabled: true
 
   WebOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
@@ -185,6 +200,12 @@ Resources:
         DefaultAuthorizer: NONE
         AddDefaultAuthorizerToCorsPreflight: false
       TracingEnabled: true
+      # Stage-wide cap; a portfolio counter needs only a few requests per second
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingRateLimit: 5
+          ThrottlingBurstLimit: 10
           
   VisitorCountGetFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -196,6 +217,8 @@ Resources:
       Timeout: 10
       Architectures:
         - x86_64
+      LoggingConfig:
+        LogGroup: !Ref VisitorCountGetLogGroup
       Events:
         Getvisits:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
@@ -204,10 +227,22 @@ Resources:
             Method: get
             RestApiId: 
               Ref: ApiGatewayApi
-      Policies: 
-        - DynamoDBCrudPolicy:
-            TableName: !Ref DynamoDBTableName
-  
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt DynamoDBTable.Arn
+              Condition:
+                ForAllValues:StringEquals:
+                  dynamodb:LeadingKeys:
+                    - visits
+
+  VisitorCountGetLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-visitor-get"
+      RetentionInDays: 14
+
   VisitorCountPutFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -218,6 +253,8 @@ Resources:
       Architectures:
         - x86_64
       Timeout: 10
+      LoggingConfig:
+        LogGroup: !Ref VisitorCountPutLogGroup
       Events:
         UpdateVisits:
           Type: Api
@@ -226,9 +263,36 @@ Resources:
             Method: put
             RestApiId: 
               Ref: ApiGatewayApi
-      Policies: 
-        - DynamoDBCrudPolicy:
-            TableName: !Ref DynamoDBTableName
+        # CORS preflight is answered by the function so only the portfolio origins are allowed
+        UpdateVisitsPreflight:
+          Type: Api
+          Properties:
+            Path: /visits
+            Method: options
+            RestApiId:
+              Ref: ApiGatewayApi
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:GetItem
+              Resource: !GetAtt DynamoDBTable.Arn
+              Condition:
+                ForAllValues:StringEquals:
+                  dynamodb:LeadingKeys:
+                    - visits
+            # Written inside TransactWriteItems, where AWS does not document
+            # per-item LeadingKeys checks, so these are scoped to the table only
+            - Effect: Allow
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+              Resource: !GetAtt DynamoDBTable.Arn
+
+  VisitorCountPutLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-visitor-put"
+      RetentionInDays: 14
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
