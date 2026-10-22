@@ -113,7 +113,7 @@ Settings → Secrets and variables → Actions → **Variables** (not secrets; r
    sam build && sam deploy --role-arn arn:aws:iam::<ACCOUNT_ID>:role/cfn-exec-kordis-cloud \
      --parameter-overrides ReservedConcurrency=1
    ```
-   then the same command with `ReservedConcurrency=2` to set it back. (Use any parameter value that changes the stack; with `0` already set in samconfig, use 0 then 1.) If it fails, the stack event names the missing action; add it and repeat. If the stack is ever stuck in `UPDATE_ROLLBACK_FAILED`, run `aws cloudformation continue-update-rollback --stack-name kordis-cloud --role-arn <a role with admin rights>`.
+   then the same command with `ReservedConcurrency=2` to set it back. (If your account can't reserve concurrency and samconfig sets `ReservedConcurrency=0`, use a local, uncommitted edit instead, e.g. `RetentionInDays: 7` on one log group, deploy, then deploy again without it.) If it fails, the stack event names the missing action; add it and repeat. If the stack is ever stuck in `UPDATE_ROLLBACK_FAILED`, run `aws cloudformation continue-update-rollback --stack-name kordis-cloud --role-arn <a role with admin rights>`.
 2. Merge this PR only after steps 1 to 6 and 7.1. Every merge deploys, and jobs fail at "Configure AWS credentials" if a variable is missing.
 3. Run the workflow once with **Run workflow** and check that all jobs are green.
 4. Delete the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` repository secrets, then deactivate and delete that IAM user's access key.
