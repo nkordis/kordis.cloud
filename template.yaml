@@ -63,13 +63,12 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref S3BucketName
-      WebsiteConfiguration:
-        IndexDocument: index.html
+      # Private bucket: only CloudFront (through the OAC below) can read objects
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        IgnorePublicAcls: false
-        BlockPublicPolicy: false
-        RestrictPublicBuckets: false
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
 
   DynamoDBTable:
     Type: AWS::DynamoDB::Table
@@ -87,6 +86,37 @@ Resources:
         AttributeName: expiresAt
         Enabled: true
 
+  WebOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${S3BucketName}-oac"
+        Description: "Lets the kordis.cloud distribution read the private site bucket"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # Honors the Cache-Control header set at upload (see the deploy-site job):
+  # hashed build assets are cached for a year, HTML and profile JSON for 5 minutes.
+  # Objects without a header fall back to DefaultTTL.
+  WebCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub "${S3BucketName}-site"
+        DefaultTTL: 300
+        MinTTL: 0
+        MaxTTL: 31536000
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: true
+          EnableAcceptEncodingBrotli: true
+          CookiesConfig:
+            CookieBehavior: none
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
   WebDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -100,27 +130,27 @@ Resources:
         DefaultCacheBehavior:
           TargetOriginId: S3KordisCloudOrigin
           ViewerProtocolPolicy: redirect-to-https
-          DefaultTTL: 0
-          MaxTTL: 0
-          MinTTL: 0       
-          ForwardedValues:
-            QueryString: false
+          CachePolicyId: !Ref WebCachePolicy
+          Compress: true
         Origins:
           - DomainName: !GetAtt KordisCloudBucket.RegionalDomainName
             Id: S3KordisCloudOrigin
-            CustomOriginConfig:
-              OriginProtocolPolicy: match-viewer
+            OriginAccessControlId: !GetAtt WebOriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
         DefaultRootObject: index.html
         Enabled: true
+        # SPA fallback: the bucket is private and CloudFront has no ListBucket,
+        # so a missing key comes back as 403
         CustomErrorResponses:
           - ErrorCode: 404
             ResponsePagePath: /index.html
             ResponseCode: 200
-            ErrorCachingMinTTL: 0
+            ErrorCachingMinTTL: 10
           - ErrorCode: 403
             ResponsePagePath: /index.html
             ResponseCode: 200
-            ErrorCachingMinTTL: 0
+            ErrorCachingMinTTL: 10
  
   Route53RecordSetGroup:
     Type: AWS::Route53::RecordSetGroup
@@ -144,13 +174,18 @@ Resources:
     Properties:
       Bucket: !Ref KordisCloudBucket
       PolicyDocument:
-        Id: PublicReadS3Policy
+        Id: CloudFrontReadS3Policy
         Version: "2012-10-17"
         Statement:
-          - Effect: "Allow"
-            Principal: "*"
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Effect: "Allow"
+            Principal:
+              Service: cloudfront.amazonaws.com
             Action: "s3:GetObject"
             Resource: !Sub "arn:aws:s3:::${KordisCloudBucket}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${WebDistribution}"
 
   ApiGatewayApi:
     Type: AWS::Serverless::Api

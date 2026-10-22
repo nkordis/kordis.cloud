@@ -21,7 +21,7 @@ Visit the live site at [https://kordis.cloud](https://kordis.cloud).
 
 -  **DNS Management:** Amazon Route 53 handles DNS records for the domain, directing user requests to the appropriate AWS infrastructure.
 
--  **Storage and Static Hosting:** Amazon S3 hosts static assets and content for the website, including HTML, CSS, and JavaScript files, ensuring reliable storage and retrieval. S3 also serves as the static website host, delivering content directly to visitors.
+-  **Storage and Static Hosting:** Amazon S3 hosts static assets and content for the website, including HTML, CSS, and JavaScript files, ensuring reliable storage and retrieval. The bucket is private: visitors are served only through CloudFront, which reads it with Origin Access Control (OAC).
 
 -  **Frontend:** Developed with React.js, a modern web framework for a dynamic and interactive experience, detailed in the [web-portfolio README](web-portfolio/README.md). This component is adapted from the [jOlson's repository](https://github.com/johnolson2219/jOlson), updated to include a footer component that integrates visitor tracking functionality.
 
