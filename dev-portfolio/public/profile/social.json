@@ -1,15 +1,11 @@
 {
     "social": [
         {
-            "network" : "linkedin",
-            "href": "https://linkedin.com/in/nikoskordis"
-        },
-        {
-            "network" : "github",
+            "network": "github",
             "href": "https://github.com/nkordis"
         },
         {
-            "network" : "email",
+            "network": "email",
             "href": "mailto:nikoskordis@gmail.com"
         }
     ]

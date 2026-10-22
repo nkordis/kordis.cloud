@@ -1,7 +1,8 @@
 {
     "name": "Nikos Kordis",
     "roles": [
-        "an Applied AI Developer",
+        "learning applied AI",
         "a Software Developer"
-    ]
+    ],
+    "bio": "Copenhagen-based software developer. MSc in IT, Software Development and Technology (IT University of Copenhagen, 2010\u20132013) and BA in Sociology (Panteion University). AWS Certified Solutions Architect \u2013 Associate (April 2024). Student Mentor and Project Reviewer at Udacity, School of Cloud Computing (10/2020 \u2013 12/2023). I am learning applied AI (LLM applications, RAG, evaluation) with the aim of working in computational social science."
 }
