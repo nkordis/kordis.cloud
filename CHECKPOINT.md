@@ -7,7 +7,8 @@ Last updated: 2026-10-22
 
 ## External cost and security review (2026-10-22)
 - Findings 2, 3, 6, 9 (this PR): counter API throttled (5 req/s, burst 10, stage-wide), each counter Lambda capped by reserved concurrency (`ReservedConcurrency` parameter, default 2; 0 turns it off), PUT counts a visitor (hashed IP + User-Agent) at most once per UTC day via a DynamoDB marker with TTL, CORS answers only https://kordis.cloud and https://www.kordis.cloud (preflight handled by the PUT Lambda), GET has only `GetItem` on the `visits` key and PUT only `GetItem`/`UpdateItem` on `visits` plus `PutItem` on `visitor#*` keys, Lambdas log to new log groups with 14-day retention and no longer log IPs or User-Agents, and a CI job deletes SAM packages the stack no longer references (older than 30 days) and adds a lifecycle rule expiring old versions after 7 days.
-- Still open in their own PRs: findings 1 and 7 (S3/CloudFront), 8 and 10 (frontend), 4 (GitHub OIDC). Finding 5 is handled in PR #7.
+- Finding 4 (stacked PR): workflow moves to GitHub OIDC. Unit, integration and e2e tests get no AWS credentials; `deploy-site` and the infra jobs assume separate roles; `sam deploy` hands CloudFormation its own execution role. AWS-side setup is in docs/github-oidc-plan.md and must be done by Nikos before that PR merges.
+- Still open in their own PRs: findings 1 and 7 (S3/CloudFront), 8 and 10 (frontend). Finding 5 is handled in PR #7.
 
 ## Remaining queue
 1. Lean portfolio: short bio, 3-4 selected projects, links (confirmed facts only; TODOs for anything unconfirmed). Also review the Skills page content and the Resume link.

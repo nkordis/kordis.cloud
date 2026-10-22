@@ -6,6 +6,8 @@ on:
       - main
   workflow_dispatch:  # Manual "Run workflow" button; always deploys infra and site
 
+# AWS access uses GitHub OIDC: each job that needs AWS assumes its own narrow role
+# (see docs/github-oidc-plan.md). No long-lived AWS keys are stored in GitHub.
 permissions:
   contents: read
 
@@ -56,13 +58,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -70,15 +65,23 @@ jobs:
         pip install -r tests/requirements.txt
         pip install aws-sam-cli
 
+    # Unit tests use moto, so they get fake credentials instead of real ones
     - name: Run tests
+      env:
+        AWS_ACCESS_KEY_ID: testing
+        AWS_SECRET_ACCESS_KEY: testing
+        AWS_DEFAULT_REGION: us-east-1
       run: pytest -v tests/unit
 
     - name: Validate CloudFormation template
-      run: sam  validate
+      run: sam validate --lint --region us-east-1
 
   build-deploy-infra:
     needs: test-infra
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
     - name: Checkout code
@@ -92,15 +95,16 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        role-to-assume: ${{ vars.AWS_DEPLOY_INFRA_ROLE_ARN }}
+        role-session-name: kordis-cloud-deploy-infra
         aws-region: us-east-1
 
     - name: Build infrastructure
       run: sam build
 
     - name: Deploy infrastructure
-      run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+      # CloudFormation creates the resources with its own execution role, not the GitHub role
+      run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --role-arn "${{ vars.AWS_CFN_EXECUTION_ROLE_ARN }}"
 
   integration-tests:
     needs: build-deploy-infra
@@ -112,19 +116,14 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.13'
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r tests/requirements.txt
-    - name: Set AWS SAM Stack Name
-      run: echo "AWS_SAM_STACK_NAME=kordis-cloud" >> $GITHUB_ENV
+    # The public API URL is known, so these tests need no AWS credentials
     - name: Run Integration Tests
+      env:
+        KORDIS_API_URL: https://api.kordis.cloud/
       run: pytest -vv tests/integration/test_api_gateway.py
 
   # Delete SAM packages the stack no longer uses (older than 30 days) and expire
@@ -133,6 +132,9 @@ jobs:
     needs: integration-tests
     runs-on: ubuntu-latest
     continue-on-error: true
+    permissions:
+      contents: read
+      id-token: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -143,8 +145,8 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        role-to-assume: ${{ vars.AWS_DEPLOY_INFRA_ROLE_ARN }}
+        role-session-name: kordis-cloud-cleanup-artifacts
         aws-region: us-east-1
     - name: Clean up old SAM artifacts
       run: |
@@ -153,6 +155,9 @@ jobs:
 
   deploy-site:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -171,8 +176,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_SITE_ROLE_ARN }}
+          role-session-name: kordis-cloud-deploy-site
           aws-region: us-east-1
       - name: Sync Website files to S3 Bucket
         run: aws s3 sync ./dev-portfolio/build s3://kordis-cloud --delete
