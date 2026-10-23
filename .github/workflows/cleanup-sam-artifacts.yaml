@@ -1,0 +1,39 @@
+name: cleanup-sam-artifacts
+
+# Weekly SAM artifact cleanup, so old packages are removed even when no infra
+# deploy runs (the main workflow also runs it after each successful deploy).
+# Scheduled runs use main, so they assume the same GitHub infra role.
+on:
+  schedule:
+    - cron: '17 3 * * 1'  # Mondays 03:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+# Never overlaps a deploy, which may still need the artifacts it just uploaded
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ vars.AWS_DEPLOY_INFRA_ROLE_ARN }}
+        role-session-name: kordis-cloud-cleanup-artifacts
+        aws-region: us-east-1
+    - name: Clean up old SAM artifacts
+      run: |
+        pip install boto3
+        python scripts/cleanup_sam_artifacts.py --stack kordis-cloud --prefix kordis-cloud
