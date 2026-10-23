@@ -280,13 +280,24 @@ Resources:
                 ForAllValues:StringEquals:
                   dynamodb:LeadingKeys:
                     - visits
-            # Written inside TransactWriteItems, where AWS does not document
-            # per-item LeadingKeys checks, so these are scoped to the table only
+            # Both writes run inside one TransactWriteItems. Each item is authorized as its
+            # own PutItem/UpdateItem: PutItem only for the daily visitor markers, UpdateItem
+            # only for the counter. (ForAllValues passes if AWS sends no LeadingKeys for a
+            # transaction item, so this cannot break the counter; it narrows it where checked.)
             - Effect: Allow
-              Action:
-                - dynamodb:PutItem
-                - dynamodb:UpdateItem
+              Action: dynamodb:UpdateItem
               Resource: !GetAtt DynamoDBTable.Arn
+              Condition:
+                ForAllValues:StringEquals:
+                  dynamodb:LeadingKeys:
+                    - visits
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt DynamoDBTable.Arn
+              Condition:
+                ForAllValues:StringLike:
+                  dynamodb:LeadingKeys:
+                    - "visitor#*"
 
   VisitorCountPutLogGroup:
     Type: AWS::Logs::LogGroup
