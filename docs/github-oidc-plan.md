@@ -21,7 +21,7 @@ The three role names deliberately do **not** start with `kordis-cloud-`. The exe
 
 ## Steps
 
-Steps 1 to 5 are automated in `scripts/oidc-setup.sh`. In AWS CloudShell run:
+Steps 1 to 5 are automated in `scripts/oidc-setup.sh`. Each rerun resets the three roles to exactly what the script declares: trust policy, inline policies (undeclared ones are deleted), no attached managed policies and no boundary on the deploy roles. In AWS CloudShell run:
 ```
 curl -fsSL https://raw.githubusercontent.com/nkordis/kordis.cloud/main/scripts/oidc-setup.sh -o oidc-setup.sh && bash oidc-setup.sh
 ```
@@ -72,8 +72,12 @@ Permissions: what the stack creates, limited to its resources where AWS supports
 - `dynamodb:*` on `arn:aws:dynamodb:us-east-1:<ACCOUNT_ID>:table/kordis-cloud`
 - `lambda:*` on `arn:aws:lambda:us-east-1:<ACCOUNT_ID>:function:kordis-cloud-*`
 - `logs:*` on `arn:aws:logs:us-east-1:<ACCOUNT_ID>:log-group:/aws/lambda/kordis-cloud-*`, plus `logs:DescribeLogGroups` on `*` (that call can't be scoped to a prefix)
-- `iam:GetRole`, `CreateRole`, `DeleteRole`, `TagRole`, `UntagRole`, `PutRolePolicy`, `DeleteRolePolicy`, `GetRolePolicy`, `ListRolePolicies`, `ListAttachedRolePolicies`, `DetachRolePolicy`, `UpdateAssumeRolePolicy`, `PassRole` on `arn:aws:iam::<ACCOUNT_ID>:role/kordis-cloud-*`
-- `iam:AttachRolePolicy` on the same roles, **only** with condition `ArnEquals` `iam:PolicyARN` = `arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole` or `arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess` (the two managed policies SAM attaches), so a deploy can never attach an admin policy
+- `iam:GetRole`, `DeleteRole`, `TagRole`, `UntagRole`, `GetRolePolicy`, `ListRolePolicies`, `ListAttachedRolePolicies`, `UpdateAssumeRolePolicy` on `arn:aws:iam::<ACCOUNT_ID>:role/kordis-cloud-*`
+- `iam:CreateRole`, `PutRolePermissionsBoundary`, `PutRolePolicy`, `DeleteRolePolicy`, `DetachRolePolicy` on the same roles, **only** with condition `iam:PermissionsBoundary` = `arn:aws:iam::<ACCOUNT_ID>:policy/kordis-cloud-lambda-boundary` (see below). `iam:DeleteRolePermissionsBoundary` is never granted.
+- `iam:AttachRolePolicy` on the same roles, **only** with that boundary condition and `ArnEquals` `iam:PolicyARN` = `arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole` or `arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess` (the two managed policies SAM attaches)
+- `iam:PassRole` on the same roles, only with `iam:PassedToService` = `lambda.amazonaws.com`
+
+**Why the boundary.** Restricting managed-policy attachments alone is not enough: with `CreateRole`, `PutRolePolicy` and `PassRole`, a deploy could create a `kordis-cloud-*` role with an inline `Action: "*"` policy and run Lambda code under it. Every role the stack creates now carries the managed policy `kordis-cloud-lambda-boundary` (set in `template.yaml` Globals), and a role's effective permissions are the intersection of its policies and its boundary. The boundary allows only `GetItem`/`PutItem`/`UpdateItem` on the `kordis-cloud` table, writing to the `/aws/lambda/kordis-cloud-*` log groups, and X-Ray writes. The execution role can only create or change roles that carry this boundary, cannot remove it, and has no permission to edit the boundary policy. This also narrows the broad log permissions in SAM's default `AWSLambdaBasicExecutionRole` to the stack's own log groups.
 - `s3:*` on `arn:aws:s3:::kordis-cloud` (bucket settings and policy, not objects)
 - `s3:GetObject` on `arn:aws:s3:::aws-sam-cli-managed-default-samclisourcebucket-*/*` (Lambda reads the code package with the caller's permissions)
 - `apigateway:*` on `arn:aws:apigateway:us-east-1::/*` (API Gateway has no useful per-API scoping at create time)
@@ -92,7 +96,8 @@ These were written from the template, not tested against the account. Step 7 tes
     { "Sid": "Stacks", "Effect": "Allow",
       "Action": ["cloudformation:CreateChangeSet", "cloudformation:DescribeChangeSet", "cloudformation:ExecuteChangeSet",
                  "cloudformation:DeleteChangeSet", "cloudformation:DescribeStacks", "cloudformation:DescribeStackEvents",
-                 "cloudformation:GetTemplate", "cloudformation:GetTemplateSummary", "cloudformation:ListStackResources"],
+                 "cloudformation:GetTemplate", "cloudformation:GetTemplateSummary", "cloudformation:ListStackResources",
+                 "cloudformation:ContinueUpdateRollback", "cloudformation:CancelUpdateStack"],
       "Resource": ["arn:aws:cloudformation:us-east-1:<ACCOUNT_ID>:stack/kordis-cloud/*",
                    "arn:aws:cloudformation:us-east-1:<ACCOUNT_ID>:stack/aws-sam-cli-managed-default/*",
                    "arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31"] },
@@ -121,7 +126,7 @@ Settings → Secrets and variables → Actions → **Variables** (not secrets; r
    sam build && sam deploy --role-arn arn:aws:iam::<ACCOUNT_ID>:role/cfn-exec-kordis-cloud \
      --parameter-overrides ReservedConcurrency=1
    ```
-   then the same command with `ReservedConcurrency=2` to set it back. (If your account can't reserve concurrency and samconfig sets `ReservedConcurrency=0`, use a local, uncommitted edit instead, e.g. `RetentionInDays: 7` on one log group, deploy, then deploy again without it.) If it fails, the stack event names the missing action; add it and repeat. If the stack is ever stuck in `UPDATE_ROLLBACK_FAILED`, run `aws cloudformation continue-update-rollback --stack-name kordis-cloud --role-arn <a role with admin rights>`.
+   then the same command with `ReservedConcurrency=2` to set it back. (If your account can't reserve concurrency and samconfig sets `ReservedConcurrency=0`, use a local, uncommitted edit instead, e.g. `RetentionInDays: 7` on one log group, deploy, then deploy again without it.) If it fails, the stack event names the missing action; add it and repeat. If the stack is ever stuck in `UPDATE_ROLLBACK_FAILED`, run the **recover-stack** workflow (Actions → recover-stack → Run workflow). It calls `continue-update-rollback` with the execution role; if a resource still cannot roll back, rerun it with that resource's logical ID in `resources_to_skip`. If the execution role itself is what is missing a permission, fix the role first (rerun `scripts/oidc-setup.sh`), or run `aws cloudformation continue-update-rollback --stack-name kordis-cloud --role-arn <a role with admin rights>` from CloudShell.
 2. Merge this PR only after steps 1 to 6 and 7.1. Every merge deploys, and jobs fail at "Configure AWS credentials" if a variable is missing.
 3. Run the workflow once with **Run workflow** and check that all jobs are green.
 4. Delete the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` repository secrets, then deactivate and delete that IAM user's access key.

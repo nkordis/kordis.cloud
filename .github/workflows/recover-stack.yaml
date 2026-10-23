@@ -1,0 +1,54 @@
+name: recover-stack
+
+# Manual recovery when the kordis-cloud stack is stuck in UPDATE_ROLLBACK_FAILED
+# (every later deploy fails until the rollback is finished). Runs only from main,
+# with the same GitHub infra role as the deploy.
+on:
+  workflow_dispatch:
+    inputs:
+      resources_to_skip:
+        description: >
+          Optional, space-separated logical IDs that failed to roll back and should be
+          skipped (see the stack events). Leave empty to simply retry the rollback.
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  continue-update-rollback:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ vars.AWS_DEPLOY_INFRA_ROLE_ARN }}
+        role-session-name: kordis-cloud-recover-stack
+        aws-region: us-east-1
+
+    - name: Continue the failed rollback
+      env:
+        EXEC_ROLE: ${{ vars.AWS_CFN_EXECUTION_ROLE_ARN }}
+        SKIP: ${{ inputs.resources_to_skip }}
+      run: |
+        status=$(aws cloudformation describe-stacks --stack-name kordis-cloud --query 'Stacks[0].StackStatus' --output text)
+        echo "Stack status: $status"
+        if [ "$status" != "UPDATE_ROLLBACK_FAILED" ]; then
+          echo "Nothing to recover."
+          exit 0
+        fi
+        args=(--stack-name kordis-cloud --role-arn "$EXEC_ROLE")
+        if [ -n "$SKIP" ]; then
+          # shellcheck disable=SC2206
+          skip=($SKIP)
+          args+=(--resources-to-skip "${skip[@]}")
+        fi
+        aws cloudformation continue-update-rollback "${args[@]}"
+        aws cloudformation wait stack-rollback-complete --stack-name kordis-cloud
+        aws cloudformation describe-stacks --stack-name kordis-cloud --query 'Stacks[0].StackStatus' --output text
