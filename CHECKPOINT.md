@@ -7,11 +7,7 @@ Last updated: 2026-10-23
 - Portfolio content (PR #7): short bio on Home, trimmed Skills list, Projects page reviewed (dead links and a broken image fixed), Resume and LinkedIn links removed. Unfinished entries are not published.
 
 ## Merged since
-- PR #5 (Lambda runtime), PR #9 (deploy on main), PR #6 (Kordis company section design doc, docs/ only, not linked from the site).
-
-## Open items
-- Add applied AI projects and skills once they exist.
-- Add a Resume link back only with a public version of the CV.
+- PR #5 (Lambda runtime), PR #9 (deploy on main).
 
 ## External cost and security review (2026-10-22)
 - Findings 1 and 7 (PR #10, #11, merged): site bucket made private behind CloudFront OAC; CloudFront caches with a cache policy that follows upload Cache-Control headers (hashed `static/` assets 1 year, everything else 5 minutes). All four S3 public-access blocks are on (`RestrictPublicBuckets` was turned on in a follow-up PR after the OAC deploy, to avoid an outage).
@@ -28,7 +24,6 @@ Last updated: 2026-10-23
 ## Remaining queue
 1. SEO: meta/Open Graph link previews, no-JS fallback (currently only "You need to enable JavaScript"). Next up.
 2. Dependency review (react-scripts 5, React 17) after PR #5.
-3. Kordis company section: design doc merged (docs only); publishing is a separate decision.
 
 ## Notes
 - After the OAC change the S3 origin is no longer publicly readable, so `curl https://kordis-cloud.s3.amazonaws.com/...` returns 403. Check live content through the site, or with `aws s3 cp s3://kordis-cloud/<key> -`.
