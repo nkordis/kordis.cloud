@@ -3,27 +3,21 @@ const API_URL = 'https://api.kordis.cloud/visits';
 
 // General utility functions
 function initialize() {
-    // The PUT response already carries the count; GET only if the PUT fails
     updateVisitorCount()
-        .then(showCount)
+        .then(fetchCount)
         .catch(error => {
-            console.error("Error updating the count:", error);
-            fetchCount();
+            console.error("Error during initialization:", error);
         });
 }
 
-function showCount(count) {
-    document.getElementById('visitorCount').textContent = count;
-}
-
-// Function to update the visitor count; resolves to the new count
+// Function to update the visitor count
 async function updateVisitorCount() {
     const response = await fetch(API_URL, { method: 'PUT' });
     if (!response.ok) {
         throw new Error('Network response was not ok: ' + response.statusText);
     }
     const data = await response.json();
-    return data.visitsCount;
+    console.log('Visitor count updated:', data);
 }
 
 // Fetch visitor count
@@ -34,7 +28,7 @@ async function fetchCount() {
             throw new Error('Network response was not ok: ' + response.statusText);
         }
         const data = await response.json();
-        showCount(data.visitsCount);
+        document.getElementById('visitorCount').textContent = data.visitsCount;
     } catch (error) {
         console.error('Error fetching the count:', error);
         document.getElementById('visitorCount').textContent = 'Failed to load visitor count.';
