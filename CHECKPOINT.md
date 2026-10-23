@@ -1,6 +1,6 @@
 # CHECKPOINT
 
-Last updated: 2026-10-22
+Last updated: 2026-10-23
 
 ## Done
 - P0 (PR #4, merged): removed template placeholder sections, fixed manifest.json and HTML title/description.
@@ -19,6 +19,11 @@ Last updated: 2026-10-22
 - Findings 8 and 10 (PR #13, merged): the footer counter uses the PUT response (falls back to GET only if PUT fails), and `npm run build` now fails (postbuild check) if any `build/profile/*.json` contains "TODO", because those files are published as-is even when React hides an entry. Neither main nor PR #7 has TODO entries now; the check keeps it that way. Switching the REST API to an HTTP API (optional part of finding 8) was not done.
 - Finding 4 (PR #14, merged; AWS roles created by scripts/oidc-setup.sh; the exec role also needed CreateChangeSet on the SAM transform, added in a follow-up PR): workflow moves to GitHub OIDC. Unit, integration and e2e tests get no AWS credentials; `deploy-site` and the infra jobs assume separate roles; `sam deploy` hands CloudFormation its own execution role. AWS-side setup is in docs/github-oidc-plan.md and had to be done before that PR merged.
 - Finding 5 (bio wording) is handled in PR #7.
+
+## Second external review (2026-10-23)
+- Deploy-role escalation: the CloudFormation execution role could create a `kordis-cloud-*` role with any inline policy and pass it to Lambda. Fix: permissions boundary `kordis-cloud-lambda-boundary` on every stack role (template Globals); the exec role can only create or edit roles carrying it, cannot remove it, and passes roles only to Lambda. `scripts/oidc-setup.sh` creates the boundary and must be rerun before the template change deploys.
+- `scripts/oidc-setup.sh` reruns now reset trust policies and remove undeclared inline/managed policies.
+- Recovery: the infra role has `ContinueUpdateRollback`/`CancelUpdateStack`; `.github/workflows/recover-stack.yaml` (manual) finishes a failed rollback.
 
 ## Remaining queue
 1. SEO: meta/Open Graph link previews, no-JS fallback (currently only "You need to enable JavaScript"). Next up.

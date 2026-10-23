@@ -44,6 +44,9 @@ Globals:
     Timeout: 3
     MemorySize: 128
     ReservedConcurrentExecutions: !If [HasReservedConcurrency, !Ref ReservedConcurrency, !Ref AWS::NoValue]
+    # Caps every function role the stack creates (see scripts/oidc-setup.sh). The
+    # CloudFormation execution role may only create or edit roles that carry it.
+    PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/kordis-cloud-lambda-boundary"
     Environment:
       Variables:
         TABLE_NAME: !Ref DynamoDBTableName
